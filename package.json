@@ -1,0 +1,50 @@
+{
+  "name": "bermooda-cli",
+  "version": "0.1.0",
+  "description": "CLI for scaffolding and managing bermooda ecommerce shops",
+  "type": "module",
+  "bin": {
+    "bermooda": "./src/cli.js"
+  },
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE",
+    "DESIGN.md"
+  ],
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint . && oxfmt --check .",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bermooda/bermooda-cli.git"
+  },
+  "homepage": "https://github.com/bermooda/bermooda-cli",
+  "bugs": "https://github.com/bermooda/bermooda-cli/issues",
+  "keywords": [
+    "bermooda",
+    "ecommerce",
+    "cli"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "citty": "^0.1.6",
+    "dotenv": "^16.5.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.55.0",
+    "oxlint": "^1.73.0",
+    "vitest": "^3.2.7"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "quoteProps": "consistent",
+  "sortTailwindcss": {},
+  "sortImports": {
+    "newlinesBetween": false,
+    "internalPattern": ["#/"],
+    "customGroups": [
+      {
+        "groupName": "internal-config",
+        "selector": "import",
+        "elementNamePattern": ["#/config", "#/config.*"]
+      },
+      {
+        "groupName": "internal-utils",
+        "selector": "import",
+        "elementNamePattern": ["#/utils/**"]
+      },
+      {
+        "groupName": "internal-libs",
+        "selector": "import",
+        "elementNamePattern": ["#/libs/**"]
+      },
+      {
+        "groupName": "internal-core",
+        "selector": "import",
+        "elementNamePattern": ["#/core/**"]
+      },
+      {
+        "groupName": "internal-emails",
+        "selector": "import",
+        "elementNamePattern": ["#/emails/**"]
+      },
+      {
+        "groupName": "internal-hooks",
+        "selector": "import",
+        "elementNamePattern": ["#/hooks/**"]
+      },
+      {
+        "groupName": "internal-components",
+        "selector": "import",
+        "elementNamePattern": ["#/components/**"]
+      },
+      {
+        "groupName": "internal-rest",
+        "selector": "import",
+        "elementNamePattern": ["#/**"]
+      }
+    ],
+    "groups": [
+      "builtin",
+      { "newlinesBetween": true },
+      ["external", "subpath"],
+      { "newlinesBetween": true },
+      "internal-config",
+      "internal-utils",
+      "internal-libs",
+      "internal-core",
+      "internal-emails",
+      "internal-hooks",
+      "internal-components",
+      { "newlinesBetween": true },
+      "internal-rest",
+      ["parent", "sibling", "index"],
+      "style",
+      "unknown"
+    ]
+  },
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "ignorePatterns": [".github/**", "dist/**", "coverage/**", "node_modules/**"]
+}
