@@ -38,13 +38,13 @@
   "license": "MIT",
   "dependencies": {
     "@clack/prompts": "^0.11.0",
-    "citty": "^0.1.6",
-    "dotenv": "^16.5.0",
+    "citty": "^0.2.2",
+    "dotenv": "^17.4.2",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
-    "oxfmt": "^0.55.0",
+    "oxfmt": "^0.58.0",
     "oxlint": "^1.73.0",
-    "vitest": "^3.2.7"
+    "vitest": "^4.1.10"
   }
 }
