@@ -5,6 +5,7 @@ import { defineCommand, runMain } from 'citty';
 import { devCommand } from './commands/dev.js';
 import { helpCommand } from './commands/help.js';
 import { installCommand } from './commands/install.js';
+import { mcpInit } from './commands/mcp/init.js';
 import {
   pluginAdd,
   pluginHelp,
@@ -261,6 +262,28 @@ const main = defineCommand({
         help: defineCommand({
           meta: { name: 'help', description: 'Theme help' },
           run: wrap(themeHelp),
+        }),
+      },
+    }),
+
+    mcp: defineCommand({
+      meta: { name: 'mcp', description: 'MCP server configuration' },
+      subCommands: {
+        init: defineCommand({
+          meta: {
+            name: 'init',
+            description: 'Write Cursor MCP config for this shop',
+          },
+          args: {
+            ...globalArgs,
+            url: { type: 'string', description: 'Shop URL' },
+            key: { type: 'string', description: 'Admin API key (berm_*)' },
+            force: {
+              type: 'boolean',
+              description: 'Replace invalid or existing MCP config',
+            },
+          },
+          run: wrap(mcpInit),
         }),
       },
     }),

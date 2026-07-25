@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   APP_REPO,
   APP_REPO_SLUG,
+  BOOTSTRAP_API_KEY_FILE,
+  DEFAULT_BERMOODA_URL,
   EXIT,
   MIN_NODE,
   PROJECT_JSON,
@@ -32,6 +34,8 @@ describe('constants', () => {
 
   it('stores project marker under .bermooda', () => {
     expect(PROJECT_JSON).toBe('.bermooda/project.json');
+    expect(BOOTSTRAP_API_KEY_FILE).toBe('.bermooda/bootstrap-api-key');
+    expect(DEFAULT_BERMOODA_URL).toBe('http://localhost:3000');
   });
 
   it('SAFE_ID_RE matches design contract', () => {
