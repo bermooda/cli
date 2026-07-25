@@ -16,6 +16,7 @@ describe('helpCommand', () => {
     expect(text).toMatch(/bermooda/);
     expect(text).toMatch(/install/);
     expect(text).toMatch(/plugin/);
+    expect(text).toMatch(/mcp/);
     expect(text).toMatch(/dev/);
   });
 
@@ -25,6 +26,15 @@ describe('helpCommand', () => {
     const text = logSpy.mock.calls.map((c) => c[0]).join('\n');
     expect(text).toMatch(/--local/);
     expect(text).toMatch(/--admin-email/);
+  });
+
+  it('prints mcp topic help', async () => {
+    logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    await helpCommand({ command: 'mcp' });
+    const text = logSpy.mock.calls.map((c) => c[0]).join('\n');
+    expect(text).toMatch(/mcp init/);
+    expect(text).toMatch(/--url/);
+    expect(text).toMatch(/bootstrap-api-key/);
   });
 
   it('mentions unknown topics', async () => {

@@ -18,6 +18,12 @@ export const BERMOODA_DIR = '.bermooda';
 /** Marker file written after install. */
 export const PROJECT_JSON = `${BERMOODA_DIR}/project.json`;
 
+/** One-line bootstrap API key written by shop seed (when present). */
+export const BOOTSTRAP_API_KEY_FILE = `${BERMOODA_DIR}/bootstrap-api-key`;
+
+/** Default shop URL when not configured elsewhere. */
+export const DEFAULT_BERMOODA_URL = 'http://localhost:3000';
+
 /** Safe plugin/theme id pattern. */
 export const SAFE_ID_RE = /^[a-z0-9-]+$/;
 

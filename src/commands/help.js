@@ -76,6 +76,19 @@ Development server (npx react-router dev). Loads .env without 1Password op run.
 
 Show CLI and/or shop versions.
 `,
+
+  mcp: `bermooda mcp init [--url <url>] [--key <key>]
+
+Write .cursor/mcp.json for Cursor (and a hint for Claude Desktop) using
+BERMOODA_URL + BERMOODA_API_KEY from shop .env, or .bermooda/bootstrap-api-key.
+
+Options:
+  --url <url>          Shop URL (default: BERMOODA_URL or http://localhost:3000)
+  --key <key>          Admin API key (berm_*)
+  --force              Replace invalid existing .cursor/mcp.json
+  -y, --yes
+  --json               Output { url, keyPresent, path } (key never included)
+`,
 };
 
 /**
@@ -103,6 +116,7 @@ ${pc.bold('Commands:')}
   update      Update shop app code to latest
   plugin      Manage plugins (add|update|remove|list|help)
   theme       Manage themes (add|update|remove|list|help)
+  mcp         MCP config for agents (init)
   dev         Start development server
   start       Start production server
   version     Show CLI / shop version

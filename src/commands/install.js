@@ -187,6 +187,7 @@ export async function installCommand(args = {}) {
 Next steps:
   cd ${targetDir}
   bermooda dev
+  bermooda mcp init
 
 Admin: ${adminEmail}
 `);
