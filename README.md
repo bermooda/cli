@@ -1,4 +1,4 @@
-# bermooda-cli
+# Official bermooda CLI
 
 CLI for scaffolding and managing [bermooda](https://github.com/bermooda/bermooda) ecommerce shops.
 
