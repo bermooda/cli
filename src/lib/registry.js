@@ -40,7 +40,7 @@ export async function loadRegistry() {
   try {
     debug(`Fetching registry ${DEFAULT_REGISTRY_URL}`);
     const res = await fetch(DEFAULT_REGISTRY_URL, {
-      headers: { 'User-Agent': 'bermooda-cli' },
+      headers: { 'User-Agent': '@bermooda/cli' },
     });
     if (!res.ok) {
       warn(`Registry unavailable (${res.status}); using builtin registry`);

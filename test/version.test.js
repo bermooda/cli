@@ -14,7 +14,7 @@ describe('versionCommand', () => {
   it('prints CLI version only with --cli', async () => {
     logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     await versionCommand({ cli: true });
-    expect(logSpy).toHaveBeenCalledWith(`bermooda-cli ${getCliVersion()}`);
+    expect(logSpy).toHaveBeenCalledWith(`@bermooda/cli ${getCliVersion()}`);
   });
 
   it('reports missing shop with --shop outside a shop', async () => {

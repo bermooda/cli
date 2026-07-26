@@ -2,7 +2,7 @@
 
 CLI for scaffolding and managing [bermooda](https://github.com/bermooda/bermooda) ecommerce shops.
 
-**Package:** `bermooda-cli`  
+**Package:** `@bermooda/cli`  
 **Command:** `bermooda`
 
 Design document: [DESIGN.md](./DESIGN.md) (implementation handoff for agents).
@@ -10,7 +10,7 @@ Design document: [DESIGN.md](./DESIGN.md) (implementation handoff for agents).
 ## Install
 
 ```bash
-npm i -g bermooda-cli@latest
+npm i -g @bermooda/cli@latest
 ```
 
 From this repo (development):

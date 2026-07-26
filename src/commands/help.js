@@ -36,7 +36,7 @@ Options:
 
   upgrade: `bermooda upgrade
 
-Upgrade the global bermooda-cli package to latest.
+Upgrade the global @bermooda/cli package to latest.
 `,
 
   plugin: `bermooda plugin <add|update|remove|list|help> [args]
@@ -120,7 +120,7 @@ ${pc.bold('Commands:')}
   dev         Start development server
   start       Start production server
   version     Show CLI / shop version
-  upgrade     Upgrade bermooda-cli globally
+  upgrade     Upgrade @bermooda/cli globally
   help        Show help for a command
 
 ${pc.bold('Global options:')}

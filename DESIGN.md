@@ -4,7 +4,7 @@
 **Source of truth (product intent):** https://github.com/bermooda/bermooda/blob/main/docs/cli-specs.md  
 **App repo:** https://github.com/bermooda/bermooda.git  
 **CLI repo:** https://github.com/bermooda/bermooda-cli.git (local workspace: `bermooda-cli/`)  
-**Package name:** `bermooda-cli`  
+**Package name:** `@bermooda/cli`  
 **Binary / command:** `bermooda`
 
 ---
@@ -31,7 +31,7 @@ This design is implementation-ready for agent handoff: concrete package layout, 
 
 ### Goals
 
-- Global npm install: `npm i -g bermooda-cli@latest` → `bermooda` on PATH
+- Global npm install: `npm i -g @bermooda/cli@latest` → `bermooda` on PATH
 - Interactive and non-interactive (flag-driven) flows for CI/automation
 - Safe project root detection so plugin/theme/run commands only operate inside a bermooda shop
 - Align install/seed/env with existing app scripts and settings keys (`shopName`, admin via Better Auth credential user, Prisma migrate)
@@ -65,7 +65,7 @@ This design is implementation-ready for agent handoff: concrete package layout, 
 | Plugin/theme install | Copy package into `app/plugins/<id>` or `app/themes/<id>`, merge optional peer deps into shop root `package.json`, run `npm install`                                                                                               | Runtime discovery is filesystem + `import.meta.glob`                                                  |
 | Registry             | Official index URL (default `https://raw.githubusercontent.com/bermooda/registry/main/index.json`) + builtin stub in CLI repo                                                                                                      | Spec assumes plugin/theme repos that do not exist yet                                                 |
 | Shop update          | Prefer **git pull --ff-only** when `.git` exists; else download latest app tarball and **merge non-destructive paths**                                                                                                             | Protects `.env`, local plugins/themes, `prisma/*.db`                                                  |
-| Self-upgrade         | `npm install -g bermooda-cli@latest`                                                                                                                                                                                               | Spec’s `bermooda upgrade`                                                                             |
+| Self-upgrade         | `npm install -g @bermooda/cli@latest`                                                                                                                                                                                              | Spec’s `bermooda upgrade`                                                                             |
 | Dev start            | Spawn `npx react-router dev` with `.env` loaded (**do not** require 1Password `op run`)                                                                                                                                            | App’s `npm run dev` wraps `op run`                                                                    |
 
 ---
@@ -76,7 +76,7 @@ All CLI code lives in the **standalone** repo root (local: `/Users/cvgellhorn/de
 
 ```
 bermooda-cli/                      # own git repo → github.com/bermooda/bermooda-cli
-  package.json                     # name: bermooda-cli, bin.bermooda
+  package.json                     # name: @bermooda/cli, bin.bermooda
   README.md
   LICENSE
   .gitignore
@@ -129,7 +129,7 @@ bermooda-cli/                      # own git repo → github.com/bermooda/bermoo
 
 ```json
 {
-  "name": "bermooda-cli",
+  "name": "@bermooda/cli",
   "version": "0.1.0",
   "description": "CLI for scaffolding and managing bermooda ecommerce shops",
   "type": "module",
@@ -154,7 +154,7 @@ Build: esbuild/unbuild to `dist/`, or ship plain ESM from `src/` with `"bin": { 
 ### Cross-repo dependency diagram
 
 ```
-npm i -g bermooda-cli          →  publishes from bermooda/bermooda-cli
+npm i -g @bermooda/cli         →  publishes from bermooda/bermooda-cli
 bermooda install               →  downloads github.com/bermooda/bermooda
 bermooda plugin/theme *        →  registry + filesystem under shop checkout
 bermooda seed/bootstrap        →  runs scripts inside the shop (app repo code)
@@ -261,13 +261,13 @@ Mirror plugins targeting `app/themes/<id>/`. Support `--activate` to set `active
 
 ### `bermooda version [--cli|--shop]`
 
-- `--cli`: version of the installed `bermooda-cli` package
+- `--cli`: version of the installed `@bermooda/cli` package
 - `--shop`: shop `package.json` version + `.bermooda/project.json` sourceRef
 - neither: both
 
 ### `bermooda upgrade`
 
-Upgrade the **CLI** globally (`npm install -g bermooda-cli@latest`), detecting npm/pnpm/yarn when possible.
+Upgrade the **CLI** globally (`npm install -g @bermooda/cli@latest`), detecting npm/pnpm/yarn when possible.
 
 ### `bermooda start` / `bermooda dev`
 
@@ -387,7 +387,7 @@ Coordinated but **separate** from CLI commits:
 1. Adapter-aware seed / `scripts/cli-bootstrap.mjs` (SQLite + PostgreSQL)
 2. Minimal seed mode + `SEED_SHOP_NAME`
 3. Optional: `dev:plain` script without `op run` (CLI can spawn react-router regardless)
-4. README Getting Started: prefer `npm i -g bermooda-cli && bermooda install`
+4. README Getting Started: prefer `npm i -g @bermooda/cli && bermooda install`
 5. Optional link from [docs/cli-specs.md](bermooda/docs/cli-specs.md) to CLI repo README
 
 No plugin discovery changes if packages land in `app/plugins/<id>/`.
@@ -497,7 +497,7 @@ Work is split across **two repositories**. Agents should open PRs in the correct
 - **Title:** `docs: Getting Started via bermooda-cli`
 - **Paths:** `README.md`, optional `docs/cli.md`, update `docs/cli-specs.md`
 - **Deps:** first published CLI release or PR-C3 usable from git
-- **Scope:** document `npm i -g bermooda-cli` and link to CLI repo
+- **Scope:** document `npm i -g @bermooda/cli` and link to CLI repo
 
 **Suggested order:** PR-A1 ∥ PR-C1 → PR-C2 → PR-C3 (after A1) → PR-C4 / PR-C5 → PR-C6 → PR-C7 + PR-A2.
 
@@ -545,7 +545,7 @@ Work is split across **two repositories**. Agents should open PRs in the correct
 - Do not shell out to `op run`.
 - Keep commands thin; test `lib/*`.
 - Command names must match [docs/cli-specs.md](bermooda/docs/cli-specs.md) exactly.
-- CLI package name `bermooda-cli`, binary `bermooda` — no renaming.
+- CLI package name `@bermooda/cli`, binary `bermooda`.
 
 ---
 
@@ -554,5 +554,5 @@ Work is split across **two repositories**. Agents should open PRs in the correct
 - Spec commands implemented with documented flags
 - Zero-to-running-shop without reading Prisma docs
 - Plugin/theme install lands where the platform discovers them
-- Published as `bermooda-cli` from **standalone** org repo; binary `bermooda`
+- Published as `@bermooda/cli` from **standalone** org repo; binary `bermooda`
 - PR plan executable by separate agents per repo without redesign

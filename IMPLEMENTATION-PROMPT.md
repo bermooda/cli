@@ -32,7 +32,7 @@ Implement the **bermooda-cli** end-to-end per the approved design. Work is split
 | -------------------------------------------- | ------------------------------------ |
 | CLI workspace                                | `/Users/cvgellhorn/dev/bermooda-cli` |
 | App workspace                                | `/Users/cvgellhorn/dev/bermooda`     |
-| npm package                                  | `bermooda-cli`                       |
+| npm package                                  | `@bermooda/cli`                      |
 | Binary / command                             | `bermooda`                           |
 | CLI does **not** live under the app monorepo | No `packages/cli` in bermooda        |
 
@@ -69,7 +69,7 @@ Scaffold exists in `bermooda-cli`:
 5. **Tests** — Expand unit coverage (registry, fs-install path safety, env); fixture shop for plugin list/add `--path`
 6. **CI** — `.github/workflows/ci.yml` (test + smoke `node src/cli.js version --cli`)
 7. **Publish** — `.github/workflows/publish.yml` on `v*` tags (optional if not publishing yet)
-8. **Docs** — Keep `README.md` accurate; optional PR-A2: app `README.md` Getting Started → `npm i -g bermooda-cli && bermooda install`
+8. **Docs** — Keep `README.md` accurate; optional PR-A2: app `README.md` Getting Started → `npm i -g @bermooda/cli && bermooda install`
 
 ## Hard requirements
 
