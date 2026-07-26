@@ -181,10 +181,14 @@ export function detectPackageId(dir, kind) {
         return pkg.bermooda.id;
       }
       if (pkg.name) {
-        const slug = String(pkg.name)
-          .replace(/^@[^/]+\//, '')
-          .replace(/[^a-z0-9-]/gi, '-')
-          .toLowerCase();
+        let slug = String(pkg.name).replace(/^@[^/]+\//, '');
+        // Official packages use @bermooda/theme-* and @bermooda/plugin-*
+        if (kind === 'theme' && slug.startsWith('theme-')) {
+          slug = slug.slice('theme-'.length);
+        } else if (kind === 'plugin' && slug.startsWith('plugin-')) {
+          slug = slug.slice('plugin-'.length);
+        }
+        slug = slug.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
         if (SAFE_ID_RE.test(slug)) return slug;
       }
     } catch {
