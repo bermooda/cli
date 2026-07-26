@@ -62,8 +62,8 @@ This design is implementation-ready for agent handoff: concrete package layout, 
 | Project marker       | Root `package.json` with `"name": "bermooda"` **and** presence of `app/core` + `prisma/schema.prisma`                                                                                                                              | Avoid false positives; CLI may also write `.bermooda/project.json` after install                      |
 | Local vs server      | `--local` → SQLite + minimal env; `--server` → PostgreSQL + production-oriented secrets prompts                                                                                                                                    | Matches `docs/cli-specs.md` and `docs/postgres.md`                                                    |
 | Admin + store setup  | After migrate: invoke **shop-side** bootstrap (env-driven seed or `scripts/cli-bootstrap.mjs` shipped in app). Until app lands it, CLI can shell `npm run seed` with `SEED_ADMIN_*` and a small post-step for `shopName` if needed | Seed already supports `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`; shop name is setting key `shopName` |
-| Plugin/theme install | Copy package into `app/plugins/<id>` or `app/themes/<id>`, merge optional peer deps into shop root `package.json`, run `npm install`                                                                                               | Runtime discovery is filesystem + `import.meta.glob`                                                  |
-| Registry             | Official index URL (default `https://raw.githubusercontent.com/bermooda/registry/main/index.json`) + builtin stub in CLI repo                                                                                                      | Spec assumes plugin/theme repos that do not exist yet                                                 |
+| Plugin/theme install | **Default: npm package name** (`npm pack` → copy into `app/plugins/<id>` or `app/themes/<id>`), merge peer deps into shop root, `npm install`. Alternates: `--path` / `--git` / `--tarball`; registry fallback                     | Runtime discovery is filesystem + `import.meta.glob`                                                  |
+| Registry             | Fallback index URL (default `https://raw.githubusercontent.com/bermooda/registry/main/index.json`) + builtin stub; primary install path is npm                                                                                     | Official + third-party packages publish to npm (`@bermooda/plugin-*`, `@bermooda/theme-*`)            |
 | Shop update          | Prefer **git pull --ff-only** when `.git` exists; else download latest app tarball and **merge non-destructive paths**                                                                                                             | Protects `.env`, local plugins/themes, `prisma/*.db`                                                  |
 | Self-upgrade         | `npm install -g @bermooda/cli@latest`                                                                                                                                                                                              | Spec’s `bermooda upgrade`                                                                             |
 | Dev start            | Spawn `npx react-router dev` with `.env` loaded (**do not** require 1Password `op run`)                                                                                                                                            | App’s `npm run dev` wraps `op run`                                                                    |
@@ -239,17 +239,24 @@ Updates an existing shop’s **app** code to the latest version.
 
 **Flags:** `--ref`, `--dry-run`, `--yes`
 
-### `bermooda plugin add <plugin-name> [version]`
+### `bermooda plugin add <npm-package> [version]`
 
 1. `assertInShop`
-2. Resolve package from registry (`type: "plugin"`, name or id) or alternate source flags
-3. Download version (default latest semver)
-4. Extract to `app/plugins/<id>/` (id from package manifest)
-5. Validate required plugin shape (`manifest` / `index.server.js`)
-6. Merge declared peer/extra deps into shop root; `npm install`
-7. `--enable` optional (default **off**): update `enabledPlugins` via shop helper/DB if available
+2. **Default:** resolve the positional argument as an **npm package name** (e.g. `@bermooda/plugin-subscriptions`), download via `npm pack`, extract
+3. Fallback: bermooda registry (`type: "plugin"`, name or id) when npm pack fails
+4. Alternate sources: `--path` / `--git` / `--tarball`
+5. Copy to `app/plugins/<id>/` (id from `package.json` `bermooda.id`, else slug; strips `plugin-` prefix from npm name)
+6. Validate required plugin shape (`manifest` / `index.server.js`)
+7. Merge declared peer/extra deps (`peerDependencies` + `bermooda.dependencies`) into shop root; `npm install` (skip with `--skip-deps`)
+8. `--enable` optional (default **off**): update `enabledPlugins` via shop helper/DB if available
 
-**Alternate sources:** `--path <dir>`, `--git <url>#ref`, `--tarball <url>`
+**Examples:**
+
+```bash
+bermooda plugin add @bermooda/plugin-subscriptions
+bermooda plugin add @bermooda/plugin-subscriptions 1.2.0
+bermooda plugin add @third-party/bermooda-plugin-foo
+```
 
 ### `bermooda plugin update|remove|list|help`
 
@@ -257,7 +264,7 @@ As in original design: update with backup under `.bermooda/backups/plugins/`, re
 
 ### `bermooda theme add|update|remove|list|help`
 
-Mirror plugins targeting `app/themes/<id>/`. Support `--activate` to set `activeTheme`. Never remove the only remaining theme if it is `default` without confirmation.
+Mirror plugins targeting `app/themes/<id>/`. Default source is npm package name (e.g. `@bermooda/theme-paper`). Support `--activate` to set `activeTheme`. Never remove the only remaining theme if it is `default` without confirmation.
 
 ### `bermooda version [--cli|--shop]`
 
@@ -336,7 +343,7 @@ Fallback until app PR merges: `npm run seed` with admin env only + document that
 
 **Schema (v1):** packages with `name`, `id`, `type` (`plugin`|`theme`), `versions`, `latest`, tarball + optional integrity + `minBermoodaVersion`.
 
-Until registry exists: ship `src/data/builtin-registry.json` in **this CLI repo**; support `--path` / `--git` / `--tarball`.
+Until registry exists: ship `src/data/builtin-registry.json` in **this CLI repo**; support npm package names as the default install source, plus `--path` / `--git` / `--tarball`.
 
 ---
 

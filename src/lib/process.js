@@ -55,6 +55,47 @@ export function run(command, args, opts = {}) {
 }
 
 /**
+ * Spawn a command and capture stdout/stderr. Resolves with exit code + output.
+ * @param {string} command
+ * @param {string[]} args
+ * @param {{ cwd?: string, env?: NodeJS.ProcessEnv, shell?: boolean }} [opts]
+ * @returns {Promise<{ code: number, stdout: string, stderr: string }>}
+ */
+export function runCapture(command, args, opts = {}) {
+  debug(`$ ${command} ${args.join(' ')}`);
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(command, args, {
+      cwd: opts.cwd ?? process.cwd(),
+      env: opts.env ?? process.env,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: opts.shell ?? false,
+    });
+    /** @type {Buffer[]} */
+    const outChunks = [];
+    /** @type {Buffer[]} */
+    const errChunks = [];
+    child.stdout?.on('data', (chunk) => outChunks.push(chunk));
+    child.stderr?.on('data', (chunk) => errChunks.push(chunk));
+    child.on('error', (err) => {
+      if (/** @type {NodeJS.ErrnoException} */ (err).code === 'ENOENT') {
+        resolvePromise({ code: 127, stdout: '', stderr: 'command not found' });
+        return;
+      }
+      reject(err);
+    });
+    child.on('close', (code, signal) => {
+      const stdout = Buffer.concat(outChunks).toString('utf8');
+      const stderr = Buffer.concat(errChunks).toString('utf8');
+      if (signal === 'SIGINT' || signal === 'SIGTERM') {
+        resolvePromise({ code: 130, stdout, stderr });
+        return;
+      }
+      resolvePromise({ code: code ?? 1, stdout, stderr });
+    });
+  });
+}
+
+/**
  * @param {string} shopRoot
  * @param {string[]} npmArgs
  * @param {Record<string, string>} [env]

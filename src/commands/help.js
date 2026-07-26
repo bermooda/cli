@@ -41,24 +41,33 @@ Upgrade the global @bermooda/cli package to latest.
 
   plugin: `bermooda plugin <add|update|remove|list|help> [args]
 
-  plugin add <name> [version]   Install into app/plugins/<id>
-  plugin update <name> [version]
-  plugin remove <name>
+  plugin add <npm-package> [version]   Install from npm into app/plugins/<id>
+  plugin update <npm-package> [version]
+  plugin remove <id>
   plugin list
   plugin help
 
-Sources: registry name, --path, --git, --tarball
+Default source is the npm package name (official + third-party), e.g.:
+  bermooda plugin add @bermooda/plugin-subscriptions
+
+Alternate sources: --path, --git, --tarball
+  --skip-deps          Skip merging peer deps / npm install
   --enable             Enable after add (default: off)
 `,
 
   theme: `bermooda theme <add|update|remove|list|help> [args]
 
-  theme add <name> [version]    Install into app/themes/<id>
-  theme update <name> [version]
-  theme remove <name>
+  theme add <npm-package> [version]    Install from npm into app/themes/<id>
+  theme update <npm-package> [version]
+  theme remove <id>
   theme list
   theme help
 
+Default source is the npm package name (official + third-party), e.g.:
+  bermooda theme add @bermooda/theme-paper
+
+Alternate sources: --path, --git, --tarball
+  --skip-deps          Skip merging peer deps / npm install
   --activate           Set activeTheme after add
 `,
 

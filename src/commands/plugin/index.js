@@ -1,88 +1,43 @@
-import { rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { existsSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { EXIT } from '../../lib/constants.js';
 import {
-  detectPackageId,
-  extractTarball,
-  installFromPath,
-  listInstalled,
-} from '../../lib/fs-install.js';
+  installExtension,
+  resolveExtensionSource,
+} from '../../lib/extension-source.js';
+import { listInstalled } from '../../lib/fs-install.js';
 import { error, info, success } from '../../lib/logger.js';
-import { run } from '../../lib/process.js';
 import { assertInShop } from '../../lib/project.js';
-import { resolvePackage } from '../../lib/registry.js';
 
 /**
  * @param {Record<string, any>} args
  */
 export async function pluginAdd(args) {
   const shopRoot = assertInShop(args.cwd ?? process.cwd());
-  const name = args.name;
-  if (!name && !args.path && !args.git && !args.tarball) {
-    error('Usage: bermooda plugin add <plugin-name> [version]');
-    process.exit(EXIT.USER);
-  }
+  const source = await resolveExtensionSource({
+    kind: 'plugin',
+    name: args.name,
+    version: args.version,
+    path: args.path,
+    git: args.git,
+    tarball: args.tarball,
+  });
 
-  let sourceDir;
-  let id;
-  let cleanup;
+  const id = await installExtension({
+    shopRoot,
+    kind: 'plugin',
+    source,
+    replace: false,
+    skipDeps: Boolean(args.skipDeps),
+  });
 
-  if (args.path) {
-    sourceDir = resolve(args.path);
-    id = args.name ?? detectPackageId(sourceDir, 'plugin');
-  } else if (args.git) {
-    const tmp = join(tmpdir(), `bermooda-plugin-git-${Date.now()}`);
-    const [url, gitRef] = String(args.git).split('#');
-    const gitArgs = ['clone', '--depth', '1'];
-    if (gitRef) gitArgs.push('--branch', gitRef);
-    gitArgs.push(url, tmp);
-    const code = await run('git', gitArgs);
-    if (code !== 0) {
-      error('git clone failed for plugin');
-      process.exit(EXIT.NETWORK);
-    }
-    sourceDir = tmp;
-    id = args.name ?? detectPackageId(sourceDir, 'plugin');
-    cleanup = tmp;
-  } else if (args.tarball) {
-    const extractParent = join(tmpdir(), `bermooda-plugin-tar-${Date.now()}`);
-    sourceDir = await extractTarball(args.tarball, extractParent);
-    id = args.name ?? detectPackageId(sourceDir, 'plugin');
-    cleanup = extractParent;
-  } else {
-    const { pkg, version, meta } = await resolvePackage(
-      'plugin',
-      name,
-      args.version
+  if (args.enable) {
+    info(
+      'Plugin enable via CLI is best-effort; enable in Admin → Plugins if needed.'
     );
-    id = pkg.id;
-    if (!meta.tarball) {
-      error(`Registry entry for ${id}@${version} has no tarball URL`);
-      process.exit(EXIT.USER);
-    }
-    const extractParent = join(tmpdir(), `bermooda-plugin-reg-${Date.now()}`);
-    sourceDir = await extractTarball(meta.tarball, extractParent);
-    cleanup = extractParent;
   }
-
-  try {
-    installFromPath({
-      shopRoot,
-      kind: 'plugin',
-      id,
-      sourceDir,
-      replace: false,
-    });
-    if (args.enable) {
-      info(
-        'Plugin enable via CLI is best-effort; enable in Admin → Plugins if needed.'
-      );
-    }
-  } finally {
-    if (cleanup) rmSync(cleanup, { recursive: true, force: true });
-  }
+  return id;
 }
 
 /**
@@ -91,66 +46,31 @@ export async function pluginAdd(args) {
 export async function pluginUpdate(args) {
   const shopRoot = assertInShop(args.cwd ?? process.cwd());
   if (!args.name && !args.path && !args.tarball && !args.git) {
-    error('Usage: bermooda plugin update <plugin-name> [version]');
+    error(
+      'Usage: bermooda plugin update <npm-package|id> [version]\n' +
+        '  Example: bermooda plugin update @bermooda/plugin-subscriptions'
+    );
     process.exit(EXIT.USER);
   }
 
-  // Reuse add path with replace
-  const name = args.name;
-  let sourceDir;
-  let id;
-  let cleanup;
+  const source = await resolveExtensionSource({
+    kind: 'plugin',
+    name: args.name,
+    version: args.version,
+    path: args.path,
+    git: args.git,
+    tarball: args.tarball,
+  });
 
-  if (args.path) {
-    sourceDir = resolve(args.path);
-    id = name ?? detectPackageId(sourceDir, 'plugin');
-  } else if (args.tarball) {
-    const extractParent = join(tmpdir(), `bermooda-plugin-tar-${Date.now()}`);
-    sourceDir = await extractTarball(args.tarball, extractParent);
-    id = name ?? detectPackageId(sourceDir, 'plugin');
-    cleanup = extractParent;
-  } else if (args.git) {
-    const tmp = join(tmpdir(), `bermooda-plugin-git-${Date.now()}`);
-    const [url, gitRef] = String(args.git).split('#');
-    const gitArgs = ['clone', '--depth', '1'];
-    if (gitRef) gitArgs.push('--branch', gitRef);
-    gitArgs.push(url, tmp);
-    const code = await run('git', gitArgs);
-    if (code !== 0) {
-      error('git clone failed');
-      process.exit(EXIT.NETWORK);
-    }
-    sourceDir = tmp;
-    id = name ?? detectPackageId(sourceDir, 'plugin');
-    cleanup = tmp;
-  } else {
-    const { pkg, version, meta } = await resolvePackage(
-      'plugin',
-      name,
-      args.version
-    );
-    id = pkg.id;
-    if (!meta.tarball) {
-      error(`No tarball for ${id}@${version}`);
-      process.exit(EXIT.USER);
-    }
-    const extractParent = join(tmpdir(), `bermooda-plugin-reg-${Date.now()}`);
-    sourceDir = await extractTarball(meta.tarball, extractParent);
-    cleanup = extractParent;
-  }
-
-  try {
-    installFromPath({
-      shopRoot,
-      kind: 'plugin',
-      id,
-      sourceDir,
-      replace: true,
-    });
-    success(`Updated plugin ${id}`);
-  } finally {
-    if (cleanup) rmSync(cleanup, { recursive: true, force: true });
-  }
+  const id = await installExtension({
+    shopRoot,
+    kind: 'plugin',
+    source,
+    replace: true,
+    skipDeps: Boolean(args.skipDeps),
+  });
+  success(`Updated plugin ${id}`);
+  return id;
 }
 
 /**
@@ -163,7 +83,6 @@ export async function pluginRemove(args) {
     error('Usage: bermooda plugin remove <plugin-name>');
     process.exit(EXIT.USER);
   }
-  const { rmSync, existsSync } = await import('node:fs');
   const dest = join(shopRoot, 'app', 'plugins', id);
   if (!existsSync(dest)) {
     error(`Plugin not found: ${id}`);
@@ -196,16 +115,22 @@ export async function pluginList(args) {
 export async function pluginHelp() {
   console.log(`bermooda plugin commands:
 
-  add <name> [version]     Install a plugin
-  update <name> [version]  Update a plugin
-  remove <name>            Remove a plugin
-  list                     List installed plugins
-  help                     This help
+  add <npm-package> [version]     Install a plugin from npm (default)
+  update <npm-package> [version]  Update a plugin from npm
+  remove <id>                     Remove a plugin
+  list                            List installed plugins
+  help                            This help
 
-Options for add/update:
+Examples:
+  bermooda plugin add @bermooda/plugin-subscriptions
+  bermooda plugin add @bermooda/plugin-subscriptions 1.2.0
+  bermooda plugin add @some-org/bermooda-plugin-foo
+
+Alternate sources for add/update:
   --path <dir>     Install from local directory
   --git <url>#ref  Install from git
   --tarball <url>  Install from HTTPS tarball
+  --skip-deps      Skip merging peer deps / npm install
   --enable         Hint to enable after install
 `);
 }

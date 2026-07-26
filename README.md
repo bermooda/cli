@@ -73,6 +73,16 @@ Global flags: `--cwd`, `-y` / `--yes`, `--json`, `--verbose`.
 
 ### Plugin / theme sources
 
+Default: install from an **npm package name** (official `@bermooda/*` packages and third-party):
+
+```bash
+bermooda plugin add @bermooda/plugin-subscriptions
+bermooda theme add @bermooda/theme-paper
+bermooda plugin add @bermooda/plugin-subscriptions 1.2.0
+```
+
+Alternate sources:
+
 ```bash
 bermooda plugin add my-plugin --path ./packages/my-plugin
 bermooda plugin add my-plugin --git https://github.com/org/plugin.git#v1
@@ -80,7 +90,8 @@ bermooda plugin add my-plugin --tarball https://example.com/plugin.tgz
 bermooda theme list
 ```
 
-Registry URL: `BERMOODA_REGISTRY_URL` or builtin stub until the public index exists.
+If the npm package is not found, the CLI falls back to the bermooda registry
+(when configured). Registry URL: `BERMOODA_REGISTRY_URL` or builtin stub.
 
 ## Exit codes
 
