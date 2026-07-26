@@ -7,16 +7,16 @@ import { detectPackageManager, run } from '../lib/process.js';
  */
 export async function upgradeCommand() {
   const pm = detectPackageManager();
-  info(`Upgrading bermooda-cli with ${pm}…`);
+  info(`Upgrading @bermooda/cli with ${pm}…`);
 
   /** @type {string[]} */
   let args;
   if (pm === 'pnpm') {
-    args = ['add', '-g', 'bermooda-cli@latest'];
+    args = ['add', '-g', '@bermooda/cli@latest'];
   } else if (pm === 'yarn') {
-    args = ['global', 'add', 'bermooda-cli@latest'];
+    args = ['global', 'add', '@bermooda/cli@latest'];
   } else {
-    args = ['install', '-g', 'bermooda-cli@latest'];
+    args = ['install', '-g', '@bermooda/cli@latest'];
   }
 
   const code = await run(pm, args);
@@ -24,5 +24,5 @@ export async function upgradeCommand() {
     error(`Global upgrade failed. Try manually: ${pm} ${args.join(' ')}`);
     process.exit(EXIT.DEPS);
   }
-  success('bermooda-cli upgraded to latest');
+  success('@bermooda/cli upgraded to latest');
 }

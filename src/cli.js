@@ -126,7 +126,7 @@ const main = defineCommand({
     upgrade: defineCommand({
       meta: {
         name: 'upgrade',
-        description: 'Upgrade bermooda-cli globally',
+        description: 'Upgrade @bermooda/cli globally',
       },
       args: globalArgs,
       run: wrap(upgradeCommand),

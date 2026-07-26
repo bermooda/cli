@@ -14,7 +14,7 @@ import {
 describe('package-json helpers', () => {
   it('reads this CLI package version', () => {
     const pkg = getCliPackageJson();
-    expect(pkg.name).toBe('bermooda-cli');
+    expect(pkg.name).toBe('@bermooda/cli');
     expect(getCliVersion()).toMatch(/^\d+\.\d+\.\d+/);
     expect(getCliVersion()).toBe(pkg.version);
   });

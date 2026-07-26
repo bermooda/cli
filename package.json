@@ -1,5 +1,5 @@
 {
-  "name": "bermooda-cli",
+  "name": "@bermooda/cli",
   "version": "0.1.0",
   "description": "CLI for scaffolding and managing bermooda ecommerce shops",
   "type": "module",
@@ -23,6 +23,9 @@
     "lint": "oxlint . && oxfmt --check .",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check ."
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",

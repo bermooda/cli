@@ -45,7 +45,7 @@ export async function versionCommand(args = {}) {
   }
 
   if (showCli) {
-    console.log(`bermooda-cli ${out.cli}`);
+    console.log(`@bermooda/cli ${out.cli}`);
   }
   if (showShop) {
     if (out.shopError) {

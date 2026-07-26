@@ -25,7 +25,7 @@ export async function getLatestReleaseTag() {
     const res = await fetch(url, {
       headers: {
         'Accept': 'application/vnd.github+json',
-        'User-Agent': 'bermooda-cli',
+        'User-Agent': '@bermooda/cli',
       },
     });
     if (!res.ok) return null;
@@ -162,7 +162,7 @@ export async function downloadApp({ targetDir, ref, source }) {
     const tarballUrl = `https://github.com/${APP_REPO_SLUG}/archive/${archivePath}.tar.gz`;
     info(`Downloading ${tarballUrl}…`);
     const res = await fetch(tarballUrl, {
-      headers: { 'User-Agent': 'bermooda-cli' },
+      headers: { 'User-Agent': '@bermooda/cli' },
       redirect: 'follow',
     });
     lastStatus = res.status;

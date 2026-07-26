@@ -106,7 +106,7 @@ export async function extractTarball(tarball, extractParent) {
       process.exit(EXIT.NETWORK);
     }
     const res = await fetch(tarball, {
-      headers: { 'User-Agent': 'bermooda-cli' },
+      headers: { 'User-Agent': '@bermooda/cli' },
       redirect: 'follow',
     });
     if (!res.ok) {
