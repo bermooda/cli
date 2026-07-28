@@ -1,4 +1,10 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -133,7 +139,7 @@ describe('resolveExtensionSource + installExtension', () => {
       JSON.stringify({
         name: '@bermooda/plugin-subscriptions',
         version: '1.0.0',
-        bermooda: { id: 'subscriptions' },
+        bermooda: { id: 'subscriptions', engine: '>=0.0.0' },
         peerDependencies: { zod: '^3.0.0' },
       })
     );
@@ -191,6 +197,39 @@ describe('resolveExtensionSource + installExtension', () => {
     expect(shopPkg.dependencies['extra-lib']).toBe('^2.0.0');
     expect(npmSpy).toHaveBeenCalled();
     npmSpy.mockRestore();
+  });
+
+  it('rejects install when the extension engine range excludes the shop version', async () => {
+    const pkgDir = createFixturePlugin('subscriptions');
+    writeFileSync(
+      join(pkgDir, 'package.json'),
+      JSON.stringify({
+        name: '@bermooda/plugin-subscriptions',
+        version: '1.0.0',
+        bermooda: { id: 'subscriptions', engine: '>=99.0.0' },
+      })
+    );
+    cleanups.push(pkgDir);
+
+    const shop = createFixtureShop();
+    cleanups.push(shop);
+
+    exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`exit:${code}`);
+    });
+
+    await expect(
+      installExtension({
+        shopRoot: shop,
+        kind: 'plugin',
+        source: { sourceDir: pkgDir, id: 'subscriptions' },
+        skipDeps: true,
+      })
+    ).rejects.toThrow(/exit:1/);
+
+    expect(
+      existsSync(join(shop, 'app', 'plugins', 'subscriptions', 'manifest.js'))
+    ).toBe(false);
   });
 
   it('exits when no name and no alternate source', async () => {
