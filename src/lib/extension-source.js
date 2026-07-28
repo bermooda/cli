@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 import { EXIT } from './constants.js';
+import { assertEngineCompatible } from './engine.js';
 import {
   detectPackageId,
   extractTarball,
@@ -189,6 +190,15 @@ export async function installExtension(opts) {
   const { sourceDir, id, cleanup } = source;
 
   try {
+    const shopPkg = readPackageJson(shopRoot);
+    const extPkg = readPackageJson(sourceDir);
+    assertEngineCompatible({
+      shopVersion: shopPkg?.version,
+      engine: extPkg?.bermooda?.engine,
+      kind,
+      id,
+    });
+
     installFromPath({
       shopRoot,
       kind,

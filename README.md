@@ -93,6 +93,25 @@ bermooda theme list
 If the npm package is not found, the CLI falls back to the bermooda registry
 (when configured). Registry URL: `BERMOODA_REGISTRY_URL` or builtin stub.
 
+### Engine compatibility (`bermooda.engine`)
+
+Plugins and themes must declare a semver range in `package.json` under the
+`bermooda` object:
+
+```json
+{
+  "bermooda": {
+    "id": "my-plugin",
+    "engine": ">=1.0.0"
+  }
+}
+```
+
+On `plugin add|update` and `theme add|update`, the CLI compares this range
+against the shop root `package.json` `version`. Incompatible packages are
+rejected before install (exit code 1). The shop must declare a valid semver
+`version` field.
+
 ## Exit codes
 
 | Code | Meaning              |

@@ -63,7 +63,7 @@ export function createFixturePlugin(id = 'demo-plugin') {
   writeFileSync(join(dir, 'index.server.js'), 'export default {};\n');
   writeFileSync(
     join(dir, 'package.json'),
-    JSON.stringify({ name: id, bermooda: { id } }, null, 2)
+    JSON.stringify({ name: id, bermooda: { id, engine: '>=0.0.0' } }, null, 2)
   );
   return dir;
 }
