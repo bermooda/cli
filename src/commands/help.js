@@ -4,7 +4,7 @@ const TOPICS = {
   install: `bermooda install [--local|--server]
 
 Download the bermooda app, install dependencies, configure .env, database,
-admin user, and store name.
+admin user, store name, and default extensions (theme + Meilisearch + email).
 
 Options:
   --local              Local/dev profile (SQLite default)
@@ -16,11 +16,18 @@ Options:
   --admin-email <email>
   --admin-password <pass>
   --store-name <name>
+  --email-provider <resend|sendgrid|aws-ses>
+                       Email provider for transactional mail (default: resend)
   --skip-deps          Skip npm install
-  --skip-db            Skip migrate/seed
+  --skip-db            Skip migrate/seed and extension install
   --force              Allow non-empty target directory
   --force-env          Overwrite existing .env
-  -y, --yes            Non-interactive defaults
+  -y, --yes            Non-interactive defaults (email provider → resend)
+
+Environment:
+  BERMOODA_EXTENSIONS_PATH  Parent directory containing sibling extension
+                            checkouts (e.g. theme-default/, meilisearch/).
+                            Used as a local fallback before npm.
 `,
 
   update: `bermooda update
@@ -52,7 +59,7 @@ Default source is the npm package name (official + third-party), e.g.:
 
 Alternate sources: --path, --git, --tarball
   --skip-deps          Skip merging peer deps / npm install
-  --enable             Enable after add (default: off)
+  --enable             Enable after add (writes shop settings via scripts/cli-set-extensions.mjs)
 `,
 
   theme: `bermooda theme <add|update|remove|list|help> [args]
@@ -68,7 +75,7 @@ Default source is the npm package name (official + third-party), e.g.:
 
 Alternate sources: --path, --git, --tarball
   --skip-deps          Skip merging peer deps / npm install
-  --activate           Set activeTheme after add
+  --activate           Set activeTheme after add (writes shop settings via scripts/cli-set-extensions.mjs)
 `,
 
   start: `bermooda start

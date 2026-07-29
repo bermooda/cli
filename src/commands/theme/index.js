@@ -1,4 +1,4 @@
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { EXIT } from '../../lib/constants.js';
@@ -6,8 +6,9 @@ import {
   installExtension,
   resolveExtensionSource,
 } from '../../lib/extension-source.js';
+import { setShopExtensions } from '../../lib/extensions-settings.js';
 import { listInstalled } from '../../lib/fs-install.js';
-import { error, success, warn } from '../../lib/logger.js';
+import { error, success } from '../../lib/logger.js';
 import { assertInShop } from '../../lib/project.js';
 
 /**
@@ -33,9 +34,17 @@ export async function themeAdd(args) {
   });
 
   if (args.activate) {
-    warn(
-      `To activate theme "${id}", set activeTheme in Admin → Themes (or shop settings). CLI DB write not implemented in v0.1.`
-    );
+    const pkgJsonPath = join(shopRoot, 'app', 'themes', id, 'package.json');
+    let packageId = id;
+    if (existsSync(pkgJsonPath)) {
+      try {
+        const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+        if (pkg.name) packageId = pkg.name;
+      } catch {
+        // ignore — fall back to slug
+      }
+    }
+    await setShopExtensions(shopRoot, { activeTheme: packageId });
   }
   return id;
 }
@@ -134,6 +143,6 @@ Alternate sources for add/update:
   --git <url>#ref
   --tarball <url>
   --skip-deps      Skip merging peer deps / npm install
-  --activate       Hint to set activeTheme (admin recommended)
+  --activate       Set activeTheme after add (writes shop settings)
 `);
 }

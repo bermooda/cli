@@ -106,6 +106,11 @@ const main = defineCommand({
           description:
             'Local path to a bermooda app checkout (skip GitHub download)',
         },
+        emailProvider: {
+          type: 'string',
+          description:
+            'Email provider: resend|sendgrid|aws-ses (default: resend)',
+        },
       },
       run: wrap(installCommand),
     }),

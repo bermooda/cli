@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 
 import * as p from '@clack/prompts';
 
@@ -13,6 +13,11 @@ import {
   readEnvExample,
   writeEnvFile,
 } from '../lib/env.js';
+import {
+  installExtension,
+  resolveExtensionSource,
+} from '../lib/extension-source.js';
+import { setShopExtensions } from '../lib/extensions-settings.js';
 import { error, info, success } from '../lib/logger.js';
 import { getCliVersion } from '../lib/package-json.js';
 import { loadShopEnv, npm } from '../lib/process.js';
@@ -21,6 +26,43 @@ import {
   selectOrDefault,
   textOrDefault,
 } from '../lib/prompts.js';
+
+/**
+ * Maps email provider ids to their npm package names.
+ * Exported for unit testing.
+ * @type {Record<string, string>}
+ */
+export const EMAIL_PROVIDER_PACKAGES = {
+  resend: '@bermooda/plugin-resend',
+  sendgrid: '@bermooda/plugin-sendgrid',
+  'aws-ses': '@bermooda/plugin-aws-ses',
+};
+
+/**
+ * Install a default extension from npm or a local sibling path.
+ *
+ * When BERMOODA_EXTENSIONS_PATH is set, checks for a subdirectory matching
+ * the package name without the @bermooda/ scope (e.g. theme-default, plugin-resend).
+ * Falls back to npm if the local path does not exist.
+ *
+ * @param {'theme' | 'plugin'} kind
+ * @param {string} pkgName  Full npm package name, e.g. @bermooda/theme-default
+ * @param {string} shopRoot
+ * @param {string | undefined} extensionsPath  Value of BERMOODA_EXTENSIONS_PATH
+ */
+async function installDefaultExtension(kind, pkgName, shopRoot, extensionsPath) {
+  const dirName = pkgName.replace(/^@[^/]+\//, '');
+  const localPath = extensionsPath ? join(extensionsPath, dirName) : undefined;
+  const useLocalPath = Boolean(localPath && existsSync(localPath));
+
+  const source = await resolveExtensionSource({
+    kind,
+    name: useLocalPath ? undefined : pkgName,
+    path: useLocalPath ? localPath : undefined,
+  });
+
+  return installExtension({ shopRoot, kind, source, replace: true, skipDeps: true });
+}
 
 /**
  * @param {Record<string, any>} args
@@ -150,6 +192,31 @@ export async function installCommand(args = {}) {
   const storeName =
     args.storeName ?? (await textOrDefault(ctx, 'Store name', 'My Store'));
 
+  // Email provider — resolved early so all prompts are upfront before long ops.
+  // Actual extension install happens after DB bootstrap.
+  /** @type {string} */
+  let emailProvider = args.emailProvider ?? 'resend';
+  if (!args.emailProvider && interactive && !args.skipDb) {
+    emailProvider = await selectOrDefault(
+      ctx,
+      'Email provider for transactional mail',
+      [
+        { value: 'resend', label: 'Resend (recommended)' },
+        { value: 'sendgrid', label: 'SendGrid' },
+        { value: 'aws-ses', label: 'AWS SES' },
+      ],
+      emailProvider
+    );
+  }
+
+  const emailPkg = EMAIL_PROVIDER_PACKAGES[emailProvider];
+  if (!args.skipDb && !emailPkg) {
+    error(
+      `Unknown email provider "${emailProvider}". Valid options: ${Object.keys(EMAIL_PROVIDER_PACKAGES).join(', ')}`
+    );
+    process.exit(EXIT.USER);
+  }
+
   const overrides = defaultEnvOverrides(mode, {
     databaseUrl:
       databaseUrl ?? (db === 'sqlite' ? 'file:./prisma/dev.db' : undefined),
@@ -176,6 +243,28 @@ export async function installCommand(args = {}) {
       adminPassword,
       storeName,
       minimal: mode === 'server' && !args.withDemo,
+    });
+
+    // Install default theme and plugins, then write settings.
+    const extensionsPath = process.env.BERMOODA_EXTENSIONS_PATH;
+    info('Installing default theme and plugins…');
+    await installDefaultExtension(
+      'theme',
+      '@bermooda/theme-default',
+      targetDir,
+      extensionsPath
+    );
+    await installDefaultExtension(
+      'plugin',
+      '@bermooda/meilisearch',
+      targetDir,
+      extensionsPath
+    );
+    await installDefaultExtension('plugin', emailPkg, targetDir, extensionsPath);
+
+    await setShopExtensions(targetDir, {
+      activeTheme: '@bermooda/theme-default',
+      enabledPlugins: ['@bermooda/meilisearch', emailPkg],
     });
   }
 

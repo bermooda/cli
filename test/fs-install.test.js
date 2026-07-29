@@ -66,6 +66,24 @@ describe('validatePackageShape', () => {
 });
 
 describe('detectPackageId', () => {
+  it('prefers bermooda.slug over bermooda.id', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pkg-slug-'));
+    writeFileSync(
+      join(dir, 'package.json'),
+      JSON.stringify({ name: 'x', bermooda: { slug: 'my-slug', id: 'my-id' } })
+    );
+    expect(detectPackageId(dir, 'plugin')).toBe('my-slug');
+  });
+
+  it('prefers bermooda.slug over name-based derivation', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'pkg-slug-name-'));
+    writeFileSync(
+      join(dir, 'package.json'),
+      JSON.stringify({ name: '@bermooda/plugin-other', bermooda: { slug: 'my-slug' } })
+    );
+    expect(detectPackageId(dir, 'plugin')).toBe('my-slug');
+  });
+
   it('reads bermooda.id from package.json', () => {
     const dir = mkdtempSync(join(tmpdir(), 'pkg-id-'));
     writeFileSync(
