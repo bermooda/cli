@@ -169,6 +169,7 @@ export function validatePackageShape(dir, kind) {
 
 /**
  * Try to read id from manifest.js (best-effort string match) or package.json.
+ * Folder on disk = bermooda.slug (preferred), so slug takes highest priority.
  * @param {string} dir
  * @param {'plugin' | 'theme'} kind
  */
@@ -177,6 +178,10 @@ export function detectPackageId(dir, kind) {
   if (existsSync(pkgPath)) {
     try {
       const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+      // bermooda.slug is canonical: the folder on disk equals the slug.
+      if (pkg.bermooda?.slug && SAFE_ID_RE.test(pkg.bermooda.slug)) {
+        return pkg.bermooda.slug;
+      }
       if (pkg.bermooda?.id && SAFE_ID_RE.test(pkg.bermooda.id)) {
         return pkg.bermooda.id;
       }

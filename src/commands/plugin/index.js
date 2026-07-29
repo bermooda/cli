@@ -1,4 +1,4 @@
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { EXIT } from '../../lib/constants.js';
@@ -6,8 +6,9 @@ import {
   installExtension,
   resolveExtensionSource,
 } from '../../lib/extension-source.js';
+import { setShopExtensions } from '../../lib/extensions-settings.js';
 import { listInstalled } from '../../lib/fs-install.js';
-import { error, info, success } from '../../lib/logger.js';
+import { error, success } from '../../lib/logger.js';
 import { assertInShop } from '../../lib/project.js';
 
 /**
@@ -33,9 +34,17 @@ export async function pluginAdd(args) {
   });
 
   if (args.enable) {
-    info(
-      'Plugin enable via CLI is best-effort; enable in Admin → Plugins if needed.'
-    );
+    const pkgJsonPath = join(shopRoot, 'app', 'plugins', id, 'package.json');
+    let packageId = id;
+    if (existsSync(pkgJsonPath)) {
+      try {
+        const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8'));
+        if (pkg.name) packageId = pkg.name;
+      } catch {
+        // ignore — fall back to slug
+      }
+    }
+    await setShopExtensions(shopRoot, { enablePlugin: packageId });
   }
   return id;
 }
@@ -131,6 +140,6 @@ Alternate sources for add/update:
   --git <url>#ref  Install from git
   --tarball <url>  Install from HTTPS tarball
   --skip-deps      Skip merging peer deps / npm install
-  --enable         Hint to enable after install
+  --enable         Enable after install (writes shop settings)
 `);
 }
