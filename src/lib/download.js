@@ -11,8 +11,9 @@ import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 
-import { APP_REPO, APP_REPO_SLUG, EXIT } from './constants.js';
+import { APP_NPM_PACKAGE, APP_REPO, APP_REPO_SLUG, EXIT } from './constants.js';
 import { debug, error, info } from './logger.js';
+import { downloadNpmPackage, exitFromNpmError } from './npm-pack.js';
 import { run } from './process.js';
 
 /**
@@ -91,9 +92,44 @@ export function copyLocalApp(sourceDir, targetDir) {
 }
 
 /**
+ * Download the published shop package from npm into targetDir.
+ * @param {string} targetDir
+ * @param {string} [version]  npm version / dist-tag (default: latest)
+ * @returns {Promise<{ sourceRef: string, method: 'npm' }>}
+ */
+export async function downloadAppFromNpm(targetDir, version = 'latest') {
+  const spec = `${APP_NPM_PACKAGE}@${version}`;
+  info(`Downloading ${spec} from npm…`);
+  let packed;
+  try {
+    packed = await downloadNpmPackage(spec);
+  } catch (err) {
+    exitFromNpmError(
+      err,
+      'Pass --ref <tag|branch> to install from GitHub, or --source <path>.'
+    );
+  }
+
+  try {
+    mkdirSync(targetDir, { recursive: true });
+    cpSync(packed.sourceDir, targetDir, { recursive: true });
+    const resolved =
+      typeof packed.packageJson?.version === 'string'
+        ? packed.packageJson.version
+        : version;
+    return {
+      sourceRef: `${APP_NPM_PACKAGE}@${resolved}`,
+      method: 'npm',
+    };
+  } finally {
+    rmSync(packed.cleanup, { recursive: true, force: true });
+  }
+}
+
+/**
  * Download app source into a temporary directory (for non-git shop updates).
  * @param {{ ref?: string }} opts
- * @returns {Promise<{ extractDir: string, sourceRef: string, method: 'git' | 'tarball', cleanup: () => void }>}
+ * @returns {Promise<{ extractDir: string, sourceRef: string, method: 'git' | 'tarball' | 'npm', cleanup: () => void }>}
  */
 export async function downloadAppToTemp({ ref } = {}) {
   const extractDir = join(tmpdir(), `bermooda-update-${Date.now()}`);
@@ -111,11 +147,13 @@ export async function downloadAppToTemp({ ref } = {}) {
 
 /**
  * Download app source into targetDir.
- * Prefers git clone when git is available; falls back to GitHub archive tarball.
+ *
+ * Default (no `ref`): published npm package `bermooda@latest`.
+ * With `ref`: prefers git clone when git is available; falls back to GitHub archive tarball.
  * Pass `source` for a local app checkout (no network).
  *
  * @param {{ targetDir: string, ref?: string, source?: string }} opts
- * @returns {Promise<{ sourceRef: string, method: 'git' | 'tarball' | 'local' }>}
+ * @returns {Promise<{ sourceRef: string, method: 'git' | 'tarball' | 'local' | 'npm' }>}
  */
 export async function downloadApp({ targetDir, ref, source }) {
   if (source) {
@@ -123,10 +161,11 @@ export async function downloadApp({ targetDir, ref, source }) {
     return copyLocalApp(source, targetDir);
   }
 
-  let resolvedRef = ref;
-  if (!resolvedRef) {
-    resolvedRef = (await getLatestReleaseTag()) ?? 'main';
+  if (!ref) {
+    return downloadAppFromNpm(targetDir);
   }
+
+  const resolvedRef = ref;
 
   mkdirSync(targetDir, { recursive: true });
 

@@ -4,6 +4,9 @@ export const APP_REPO = 'https://github.com/bermooda/bermooda.git';
 /** GitHub owner/repo for the app. */
 export const APP_REPO_SLUG = 'bermooda/bermooda';
 
+/** Published npm package for the shop app (default install source). */
+export const APP_NPM_PACKAGE = 'bermooda';
+
 /** Default plugin/theme registry index URL. */
 export const DEFAULT_REGISTRY_URL =
   process.env.BERMOODA_REGISTRY_URL ??

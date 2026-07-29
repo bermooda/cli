@@ -83,7 +83,11 @@ const main = defineCommand({
         local: { type: 'boolean', description: 'Local install profile' },
         server: { type: 'boolean', description: 'Server install profile' },
         dir: { type: 'string', description: 'Target directory' },
-        ref: { type: 'string', description: 'App git tag or branch' },
+        ref: {
+          type: 'string',
+          description:
+            'App git tag or branch (default: install bermooda@latest from npm)',
+        },
         db: { type: 'string', description: 'sqlite | postgresql' },
         databaseUrl: { type: 'string', description: 'DATABASE_URL' },
         adminEmail: { type: 'string', description: 'Admin email' },
@@ -104,7 +108,7 @@ const main = defineCommand({
         source: {
           type: 'string',
           description:
-            'Local path to a bermooda app checkout (skip GitHub download)',
+            'Local path to a bermooda app checkout (skip npm/GitHub download)',
         },
         emailProvider: {
           type: 'string',

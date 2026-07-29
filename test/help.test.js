@@ -26,6 +26,8 @@ describe('helpCommand', () => {
     const text = logSpy.mock.calls.map((c) => c[0]).join('\n');
     expect(text).toMatch(/--local/);
     expect(text).toMatch(/--admin-email/);
+    expect(text).toMatch(/bermooda@latest/);
+    expect(text).not.toMatch(/or main/);
   });
 
   it('prints mcp topic help', async () => {

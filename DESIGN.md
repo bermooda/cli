@@ -58,7 +58,7 @@ This design is implementation-ready for agent handoff: concrete package layout, 
 | Runtime              | Node **≥ 22.22.0**, ESM only                                                                                                                                                                                                       | Matches app `engines`                                                                                 |
 | CLI framework        | **citty** (or **commander** if team prefers)                                                                                                                                                                                       | Lightweight nested subcommands (`plugin add`)                                                         |
 | Prompts              | **@clack/prompts**                                                                                                                                                                                                                 | Clean interactive UX; skip when flags provided                                                        |
-| Shop acquisition     | Prefer **GitHub tarball of latest release tag** of `bermooda/bermooda`, fallback to `git clone --depth 1`                                                                                                                          | No need for git on tarball path; works in CI                                                          |
+| Shop acquisition     | Prefer **npm package `bermooda@latest`**; with `--ref`, use GitHub tarball / `git clone --depth 1`                                                                                                                                 | Works before GitHub releases exist; `--ref` for branches/tags                                         |
 | Project marker       | Root `package.json` with `"name": "bermooda"` **and** presence of `app/core` + `prisma/schema.prisma`                                                                                                                              | Avoid false positives; CLI may also write `.bermooda/project.json` after install                      |
 | Local vs server      | `--local` → SQLite + minimal env; `--server` → PostgreSQL + production-oriented secrets prompts                                                                                                                                    | Matches `docs/cli-specs.md` and `docs/postgres.md`                                                    |
 | Admin + store setup  | After migrate: invoke **shop-side** bootstrap (env-driven seed or `scripts/cli-bootstrap.mjs` shipped in app). Until app lands it, CLI can shell `npm run seed` with `SEED_ADMIN_*` and a small post-step for `shopName` if needed | Seed already supports `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`; shop name is setting key `shopName` |
@@ -198,7 +198,7 @@ Creates a new shop directory by downloading the **app** repository (not the CLI)
 | `--local`                           | Local/dev profile (default if neither set and TTY)            |
 | `--server`                          | Server/production profile                                     |
 | `--dir <path>`                      | Target directory (default: `./bermooda` or prompted)          |
-| `--ref <tag\|branch\|sha>`          | App source ref (default: latest release tag, else `main`)     |
+| `--ref <tag\|branch\|sha>`          | App git ref (default: npm `bermooda@latest`)                  |
 | `--db <sqlite\|postgresql>`         | Override DB (local default sqlite; server default postgresql) |
 | `--database-url <url>`              | Skip URL prompt                                               |
 | `--admin-email`, `--admin-password` | Admin credentials                                             |
@@ -214,8 +214,8 @@ Creates a new shop directory by downloading the **app** repository (not the CLI)
 1. Resolve mode (`local` | `server`); error if both flags set.
 2. Resolve target dir; refuse non-empty dir unless `--force`.
 3. Download **bermooda app** source into target:
-   - `GET https://api.github.com/repos/bermooda/bermooda/releases/latest` → tarball URL, or
-   - `git clone --depth 1 --branch <ref> https://github.com/bermooda/bermooda.git <dir>`
+   - Default: `npm pack bermooda@latest` → extract into target, or
+   - With `--ref`: GitHub archive tarball / `git clone --depth 1 --branch <ref>`
 4. Write `.bermooda/project.json`: `{ "cliVersion", "installedAt", "installMode", "sourceRef", "appRepo" }`.
 5. `npm install` in target (match app docs / Cloud Agent: use `--legacy-peer-deps` only if required).
 6. Interactive env generation (see **Environment generation**).

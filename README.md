@@ -33,7 +33,7 @@ cd my-shop
 bermooda dev
 ```
 
-Offline / local app checkout (no GitHub download):
+Offline / local app checkout (skip npm download):
 
 ```bash
 bermooda install --local --source /path/to/bermooda --dir ./my-shop -y \
@@ -60,16 +60,16 @@ Global flags: `--cwd`, `-y` / `--yes`, `--json`, `--verbose`.
 
 ### Install flags
 
-| Flag                                                | Description                                        |
-| --------------------------------------------------- | -------------------------------------------------- |
-| `--local` / `--server`                              | Install profile (SQLite vs PostgreSQL defaults)    |
-| `--dir <path>`                                      | Target directory                                   |
-| `--source <path>`                                   | Local bermooda app checkout (skip network)         |
-| `--ref <tag\|branch>`                               | App source ref (default: latest release or `main`) |
-| `--admin-email`, `--admin-password`, `--store-name` | Bootstrap credentials                              |
-| `--skip-deps`, `--skip-db`                          | Skip npm install or migrate/seed                   |
-| `--force`, `--force-env`                            | Non-empty dir / overwrite `.env`                   |
-| `--with-demo`                                       | Include demo catalog on server installs            |
+| Flag                                                | Description                                       |
+| --------------------------------------------------- | ------------------------------------------------- |
+| `--local` / `--server`                              | Install profile (SQLite vs PostgreSQL defaults)   |
+| `--dir <path>`                                      | Target directory                                  |
+| `--source <path>`                                   | Local bermooda app checkout (skip network)        |
+| `--ref <tag\|branch>`                               | App git ref (default: `bermooda@latest` from npm) |
+| `--admin-email`, `--admin-password`, `--store-name` | Bootstrap credentials                             |
+| `--skip-deps`, `--skip-db`                          | Skip npm install or migrate/seed                  |
+| `--force`, `--force-env`                            | Non-empty dir / overwrite `.env`                  |
+| `--with-demo`                                       | Include demo catalog on server installs           |
 
 ### Plugin / theme sources
 

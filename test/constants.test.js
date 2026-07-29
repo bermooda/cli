@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  APP_NPM_PACKAGE,
   APP_REPO,
   APP_REPO_SLUG,
   BOOTSTRAP_API_KEY_FILE,
@@ -15,6 +16,7 @@ describe('constants', () => {
   it('points at the public app repository', () => {
     expect(APP_REPO_SLUG).toBe('bermooda/bermooda');
     expect(APP_REPO).toContain('github.com/bermooda/bermooda');
+    expect(APP_NPM_PACKAGE).toBe('bermooda');
   });
 
   it('requires Node matching the app engines floor', () => {
