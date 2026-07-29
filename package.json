@@ -25,11 +25,12 @@
     "fmt:check": "oxfmt --check ."
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bermooda/cli.git"
+    "url": "git+https://github.com/bermooda/cli.git"
   },
   "homepage": "https://github.com/bermooda/cli",
   "bugs": "https://github.com/bermooda/cli/issues",
