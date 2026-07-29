@@ -65,6 +65,13 @@ Do not use titles like “Update publish workflow” or “Address review feedba
 - Do **not** put release notes or version bumps in feature commits;
   semantic-release owns that (`chore(release): x.y.z [skip ci]`).
 
+### npm package contents
+
+`package.json` `"files"` is a whitelist: only `src/`, `README.md`, and `LICENSE`
+are published (plus `package.json`). Do not add design docs, tests, workflows,
+agent rules, or release config to `"files"` unless they are required at runtime.
+`test/npm-package-files.test.js` guards this.
+
 ### Choosing the type when unsure
 
 1. User-visible new behavior → `feat`
