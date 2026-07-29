@@ -150,8 +150,10 @@ Lint/format config matches the app repo (`.oxlintrc.json`, `.oxfmtrc.json`).
 
 ## Releasing
 
-Releases are **fully automated** with [semantic-release](https://semantic-release.org/)
-when a PR merges to `master`.
+Releases are automated with
+[release-please](https://github.com/googleapis/release-please) (no local
+semantic-release dependencies). Conventional Commits on `master` drive the
+version bump; merging the release PR publishes.
 
 1. Use [Conventional Commits](https://www.conventionalcommits.org/) in PR commits
    (or the squash merge subject). Agents must follow [AGENTS.md](./AGENTS.md) and
@@ -166,15 +168,18 @@ when a PR merges to `master`.
    | `chore:`, `docs:`, `ci:`, `test:`, … | none    |
 
 2. Merge to `master`. [`.github/workflows/publish.yml`](.github/workflows/publish.yml)
-   runs tests, then semantic-release which:
-   - bumps `package.json` / `package-lock.json`
-   - creates git tag `vX.Y.Z` and a GitHub Release
-   - publishes `@bermooda/cli` via
+   runs [release-please-action](https://github.com/googleapis/release-please-action),
+   which opens or updates a **release PR** that bumps `package.json` /
+   `package-lock.json` and `CHANGELOG.md`.
+
+3. Merge the release PR. The same workflow then:
+   - tags `vX.Y.Z` and creates a GitHub Release
+   - runs tests and publishes `@bermooda/cli` via
      [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC)
 
 No manual `npm version` or `--follow-tags` push. No `NPM_TOKEN` secret;
 provenance is published automatically. You can also run the workflow manually
-via **Actions → Publish → Run workflow**.
+via **Actions → Publish → Run workflow** (useful to refresh the release PR).
 
 ### One-time npm trusted publisher setup
 

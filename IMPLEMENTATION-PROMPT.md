@@ -68,7 +68,7 @@ Scaffold exists in `bermooda-cli`:
 4. **dev / start** — Confirm no `op run`; load shop `.env`; build-if-missing for start
 5. **Tests** — Expand unit coverage (registry, fs-install path safety, env); fixture shop for plugin list/add `--path`
 6. **CI** — `.github/workflows/ci.yml` (test + smoke `node src/cli.js version --cli`)
-7. **Publish** — `.github/workflows/publish.yml` runs semantic-release on `master` (OIDC)
+7. **Publish** — `.github/workflows/publish.yml` runs release-please on `master` (OIDC)
 8. **Docs** — Keep `README.md` accurate; optional PR-A2: app `README.md` Getting Started → `npm i -g @bermooda/cli && bermooda install`
 
 ## Hard requirements

@@ -9,23 +9,34 @@ permissions:
   contents: read
 
 jobs:
-  publish:
+  release-please:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # GitHub releases + version bump commit
-      issues: write # Comment on released issues
-      pull-requests: write # Comment on released PRs
+      contents: write # Release PR, tags, GitHub Releases
+      pull-requests: write # Open / update the release PR
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          target-branch: master
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
       id-token: write # npm trusted publishing (OIDC)
     steps:
       - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # semantic-release needs full history + tags
 
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
           # Do not set registry-url — it writes an .npmrc that conflicts with
-          # semantic-release + npm trusted publishing (OIDC).
+          # npm trusted publishing (OIDC).
           # Do not cache deps for release publishes (npm trusted publishing guidance)
 
       - name: Ensure npm supports trusted publishing
@@ -35,8 +46,7 @@ jobs:
       - run: npm test
       - run: node src/cli.js version --cli
 
-      - name: Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No NPM_TOKEN — OIDC trusted publishing. Provenance is automatic.
-        run: npx semantic-release
+      - name: Publish to npm
+        # No NPM_TOKEN — OIDC trusted publishing. Provenance is automatic via
+        # publishConfig.provenance and id-token permission.
+        run: npm publish
