@@ -148,6 +148,41 @@ command helpers.
 
 Lint/format config matches the app repo (`.oxlintrc.json`, `.oxfmtrc.json`).
 
+## Releasing
+
+Versioning is **manual semver** with `package.json` as the source of truth.
+Git tags must match that version (`vX.Y.Z` ↔ `"version": "X.Y.Z"`).
+
+1. Land the release on `master` with CI green.
+2. Bump and tag in one step (also updates `package-lock.json`):
+
+   ```bash
+   npm version patch   # or: minor | major | 0.2.0
+   git push origin master --follow-tags
+   ```
+
+3. Pushing tag `vX.Y.Z` runs [`.github/workflows/publish.yml`](.github/workflows/publish.yml),
+   which verifies the tag matches `package.json`, then publishes `@bermooda/cli`
+   via [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC).
+   No `NPM_TOKEN` secret is used; provenance is published automatically.
+
+### One-time npm trusted publisher setup
+
+On the package settings page
+([npmjs.com/package/@bermooda/cli](https://www.npmjs.com/package/@bermooda/cli) →
+**Settings** → **Trusted Publisher**):
+
+| Field               | Value         |
+| ------------------- | ------------- |
+| Organization / user | `bermooda`    |
+| Repository          | `cli`         |
+| Workflow filename   | `publish.yml` |
+| Allowed action      | `npm publish` |
+
+Optional: after the first OIDC publish succeeds, set publishing access to
+**Require two-factor authentication and disallow tokens**, then revoke any old
+automation tokens.
+
 ## Related repos
 
 - App: https://github.com/bermooda/bermooda
