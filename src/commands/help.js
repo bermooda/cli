@@ -10,7 +10,7 @@ Options:
   --local              Local/dev profile (SQLite default)
   --server             Server/production profile (PostgreSQL default)
   --dir <path>         Target directory
-  --ref <ref>          App git tag/branch (default: latest release or main)
+  --ref <ref>          App git tag/branch (default: bermooda@latest from npm)
   --db <sqlite|postgresql>
   --database-url <url>
   --admin-email <email>

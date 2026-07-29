@@ -1,7 +1,7 @@
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { EXIT, PROJECT_JSON } from '../lib/constants.js';
+import { APP_NPM_PACKAGE, EXIT, PROJECT_JSON } from '../lib/constants.js';
 import { setupDatabase } from '../lib/db.js';
 import { downloadAppToTemp, getLatestReleaseTag } from '../lib/download.js';
 import { error, info, success } from '../lib/logger.js';
@@ -16,10 +16,12 @@ import { mergeAppRelease } from '../lib/update-merge.js';
 export async function updateCommand(args = {}) {
   const shopRoot = assertInShop(args.cwd ?? process.cwd());
   const meta = readProjectMeta(shopRoot);
-  const ref = args.ref ?? (await getLatestReleaseTag()) ?? 'main';
+  /** @type {string | undefined} */
+  const ref = args.ref ?? (await getLatestReleaseTag()) ?? undefined;
   const dryRun = Boolean(args.dryRun);
+  const targetLabel = ref ?? `${APP_NPM_PACKAGE}@latest`;
 
-  info(`Updating shop at ${shopRoot} → ${ref}`);
+  info(`Updating shop at ${shopRoot} → ${targetLabel}`);
   if (meta?.sourceRef) {
     info(`Previous sourceRef: ${meta.sourceRef}`);
   }
@@ -31,8 +33,8 @@ export async function updateCommand(args = {}) {
       JSON.stringify(
         {
           shopRoot,
-          targetRef: ref,
-          strategy: hasGit ? 'git-ff' : 'tarball-merge',
+          targetRef: targetLabel,
+          strategy: hasGit ? 'git-ff' : ref ? 'tarball-merge' : 'npm-merge',
           previousRef: meta?.sourceRef ?? null,
         },
         null,
@@ -43,6 +45,12 @@ export async function updateCommand(args = {}) {
   }
 
   if (hasGit) {
+    if (!ref) {
+      error(
+        `No GitHub release tag found. Pass --ref <branch|tag> to update a git checkout (default branch is often master).`
+      );
+      process.exit(EXIT.USER);
+    }
     info('Fetching and fast-forwarding git…');
     let code = await run('git', ['fetch', '--tags', '--prune'], {
       cwd: shopRoot,
@@ -69,8 +77,14 @@ export async function updateCommand(args = {}) {
     success('Git update complete');
     writeProjectRef(shopRoot, ref, meta);
   } else {
-    info('Non-git shop: downloading app release and merging core paths…');
-    const { extractDir, sourceRef, cleanup } = await downloadAppToTemp({ ref });
+    info(
+      ref
+        ? 'Non-git shop: downloading app release and merging core paths…'
+        : `Non-git shop: downloading ${APP_NPM_PACKAGE}@latest and merging core paths…`
+    );
+    const { extractDir, sourceRef, cleanup } = await downloadAppToTemp(
+      ref ? { ref } : {}
+    );
     try {
       const result = mergeAppRelease(shopRoot, extractDir, { sourceRef });
       success(
@@ -90,7 +104,7 @@ export async function updateCommand(args = {}) {
   }
 
   await setupDatabase(shopRoot);
-  success(`Shop updated to ${ref}`);
+  success(`Shop updated to ${targetLabel}`);
 }
 
 /**
