@@ -79,7 +79,10 @@ describe('detectPackageId', () => {
     const dir = mkdtempSync(join(tmpdir(), 'pkg-slug-name-'));
     writeFileSync(
       join(dir, 'package.json'),
-      JSON.stringify({ name: '@bermooda/plugin-other', bermooda: { slug: 'my-slug' } })
+      JSON.stringify({
+        name: '@bermooda/plugin-other',
+        bermooda: { slug: 'my-slug' },
+      })
     );
     expect(detectPackageId(dir, 'plugin')).toBe('my-slug');
   });
