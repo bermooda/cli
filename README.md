@@ -150,21 +150,31 @@ Lint/format config matches the app repo (`.oxlintrc.json`, `.oxfmtrc.json`).
 
 ## Releasing
 
-Versioning is **manual semver** with `package.json` as the source of truth.
-Git tags must match that version (`vX.Y.Z` ↔ `"version": "X.Y.Z"`).
+Releases are **fully automated** with [semantic-release](https://semantic-release.org/)
+when a PR merges to `master`.
 
-1. Land the release on `master` with CI green.
-2. Bump and tag in one step (also updates `package-lock.json`):
+1. Use [Conventional Commits](https://www.conventionalcommits.org/) in PR commits
+   (or the squash merge subject). Agents must follow [AGENTS.md](./AGENTS.md) and
+   [`.cursor/rules/conventional-commits.mdc`](./.cursor/rules/conventional-commits.mdc).
+   Bump rules:
 
-   ```bash
-   npm version patch   # or: minor | major | 0.2.0
-   git push origin master --follow-tags
-   ```
+   | Commit type                          | Release |
+   | ------------------------------------ | ------- |
+   | `fix:`, `perf:`, `revert:`           | patch   |
+   | `feat:`                              | minor   |
+   | `BREAKING CHANGE:` / `feat!:` / …    | major   |
+   | `chore:`, `docs:`, `ci:`, `test:`, … | none    |
 
-3. Pushing tag `vX.Y.Z` runs [`.github/workflows/publish.yml`](.github/workflows/publish.yml),
-   which verifies the tag matches `package.json`, then publishes `@bermooda/cli`
-   via [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC).
-   No `NPM_TOKEN` secret is used; provenance is published automatically.
+2. Merge to `master`. [`.github/workflows/publish.yml`](.github/workflows/publish.yml)
+   runs tests, then semantic-release which:
+   - bumps `package.json` / `package-lock.json`
+   - creates git tag `vX.Y.Z` and a GitHub Release
+   - publishes `@bermooda/cli` via
+     [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/) (OIDC)
+
+No manual `npm version` or `--follow-tags` push. No `NPM_TOKEN` secret;
+provenance is published automatically. You can also run the workflow manually
+via **Actions → Publish → Run workflow**.
 
 ### One-time npm trusted publisher setup
 

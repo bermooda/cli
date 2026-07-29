@@ -124,7 +124,7 @@ bermooda-cli/                      # own git repo → github.com/bermooda/bermoo
   .github/
     workflows/
       ci.yml
-      publish.yml                  # npm publish on tag
+      publish.yml                  # semantic-release on master (OIDC npm publish)
 ```
 
 **`package.json` (CLI repo):**

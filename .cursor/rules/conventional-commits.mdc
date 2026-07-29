@@ -1,0 +1,47 @@
+---
+description: Conventional Commits required for semantic-release versioning
+alwaysApply: true
+---
+
+# Conventional Commits (required)
+
+This package publishes with **semantic-release** on merge to `master`. Every
+git commit message and PR / squash-merge title **must** follow Conventional
+Commits or the wrong version (or no release) will be published.
+
+## Subject format
+
+```
+<type>(optional-scope): <short description>
+```
+
+- Imperative, concise, no trailing period
+- Breaking change: `feat!: …` / `fix!: …` and/or a `BREAKING CHANGE:` footer
+
+## Type → release (must match `release.config.js`)
+
+| Type | Release |
+| ---- | ------- |
+| `feat` | **minor** |
+| `fix`, `perf`, `revert` | **patch** |
+| `feat!` / `fix!` / `BREAKING CHANGE:` | **major** |
+| `docs`, `style`, `chore`, `refactor`, `test`, `build`, `ci` | **none** |
+
+## Examples
+
+- `feat: add theme list JSON output`
+- `fix(plugin): reject incompatible bermooda.engine ranges`
+- `ci: tighten publish workflow permissions`
+- `docs: clarify install --source`
+- `chore: update vitest`
+
+## Hard rules for agents
+
+- Never commit with free-form subjects (`Update X`, `Fix stuff`, `WIP`,
+  `Address comments`).
+- Never bump `package.json` `"version"` or run `npm version` / push release
+  tags manually — semantic-release owns releases.
+- When squash-merging guidance is given, ensure the **PR title** is a valid
+  Conventional Commit (that becomes the release-analyzed subject).
+- Mixed feature + chore work: use `feat` or `fix` so a release is cut; do not
+  hide user-facing changes under `chore` or `ci`.
