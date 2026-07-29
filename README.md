@@ -154,7 +154,9 @@ Releases are **fully automated** with [semantic-release](https://semantic-releas
 when a PR merges to `master`.
 
 1. Use [Conventional Commits](https://www.conventionalcommits.org/) in PR commits
-   (or the squash merge subject). Bump rules:
+   (or the squash merge subject). Agents must follow [AGENTS.md](./AGENTS.md) and
+   [`.cursor/rules/conventional-commits.mdc`](./.cursor/rules/conventional-commits.mdc).
+   Bump rules:
 
    | Commit type                          | Release |
    | ------------------------------------ | ------- |
