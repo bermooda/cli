@@ -2,9 +2,10 @@
 
 ## Releases and commit messages
 
-Publishing is automated by [semantic-release](https://semantic-release.org/) on
-every push to `master` (see `.github/workflows/publish.yml` and
-`release.config.js`). **Commit subjects and PR titles must use
+Publishing is automated by
+[release-please](https://github.com/googleapis/release-please) on every push to
+`master` (see `.github/workflows/publish.yml` and `release-please-config.json`).
+**Commit subjects and PR titles must use
 [Conventional Commits](https://www.conventionalcommits.org/)** so the correct
 semver bump (or no release) is chosen.
 
@@ -25,7 +26,8 @@ semver bump (or no release) is chosen.
 
 ### Types and release impact
 
-These match `release.config.js`. Prefer the most accurate type for the change.
+These match `release-please-config.json` `changelog-sections`. Prefer the most
+accurate type for the change.
 
 | Type       | When to use                                      | Release |
 | ---------- | ------------------------------------------------ | ------- |
@@ -46,15 +48,22 @@ Examples:
 ```text
 feat: add bermooda mcp init for Cursor agent config
 fix(install): default shop source to bermooda@latest from npm
-ci: automate npm publish with semantic-release
+ci: switch publish workflow to release-please
 chore: bump oxlint
 docs: document conventional commits for agents
 feat!: replace plugin registry API
 ```
 
+### How the release flow works
+
+1. Merge a Conventional Commit PR to `master`.
+2. release-please opens or updates a **release PR** (version bump + `CHANGELOG.md`).
+3. Merge that release PR. release-please tags `vX.Y.Z`, creates a GitHub Release,
+   and the publish job runs `npm publish` via OIDC.
+
 ### PR / squash-merge titles
 
-If the PR is squash-merged, **the squash commit subject is what semantic-release
+If the PR is squash-merged, **the squash commit subject is what release-please
 sees**. Titles must also be Conventional Commits (`feat: …`, `fix: …`, etc.).
 Do not use titles like “Update publish workflow” or “Address review feedback”.
 
@@ -63,7 +72,8 @@ Do not use titles like “Update publish workflow” or “Address review feedba
 - Do **not** run `npm version`, edit `"version"` in `package.json` for releases,
   or push `v*` tags by hand.
 - Do **not** put release notes or version bumps in feature commits;
-  semantic-release owns that (`chore(release): x.y.z [skip ci]`).
+  release-please owns that (release PR titled like
+  `chore(master): release 1.2.3`).
 
 ### npm package contents
 
