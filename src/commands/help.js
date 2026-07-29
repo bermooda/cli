@@ -26,7 +26,7 @@ Options:
 
 Environment:
   BERMOODA_EXTENSIONS_PATH  Parent directory containing sibling extension
-                            checkouts (e.g. theme-default/, meilisearch/).
+                            checkouts (e.g. theme-default/, plugin-meilisearch/).
                             Used as a local fallback before npm.
 `,
 

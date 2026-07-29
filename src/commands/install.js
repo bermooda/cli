@@ -256,7 +256,7 @@ export async function installCommand(args = {}) {
     );
     await installDefaultExtension(
       'plugin',
-      '@bermooda/meilisearch',
+      '@bermooda/plugin-meilisearch',
       targetDir,
       extensionsPath
     );
@@ -264,7 +264,7 @@ export async function installCommand(args = {}) {
 
     await setShopExtensions(targetDir, {
       activeTheme: '@bermooda/theme-default',
-      enabledPlugins: ['@bermooda/meilisearch', emailPkg],
+      enabledPlugins: ['@bermooda/plugin-meilisearch', emailPkg],
     });
   }
 
