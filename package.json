@@ -29,10 +29,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bermooda/bermooda-cli.git"
+    "url": "https://github.com/bermooda/cli.git"
   },
-  "homepage": "https://github.com/bermooda/bermooda-cli",
-  "bugs": "https://github.com/bermooda/bermooda-cli/issues",
+  "homepage": "https://github.com/bermooda/cli",
+  "bugs": "https://github.com/bermooda/cli/issues",
   "keywords": [
     "bermooda",
     "ecommerce",

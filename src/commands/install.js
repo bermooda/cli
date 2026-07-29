@@ -33,8 +33,8 @@ import {
  * @type {Record<string, string>}
  */
 export const EMAIL_PROVIDER_PACKAGES = {
-  resend: '@bermooda/plugin-resend',
-  sendgrid: '@bermooda/plugin-sendgrid',
+  'resend': '@bermooda/plugin-resend',
+  'sendgrid': '@bermooda/plugin-sendgrid',
   'aws-ses': '@bermooda/plugin-aws-ses',
 };
 
@@ -50,7 +50,12 @@ export const EMAIL_PROVIDER_PACKAGES = {
  * @param {string} shopRoot
  * @param {string | undefined} extensionsPath  Value of BERMOODA_EXTENSIONS_PATH
  */
-async function installDefaultExtension(kind, pkgName, shopRoot, extensionsPath) {
+async function installDefaultExtension(
+  kind,
+  pkgName,
+  shopRoot,
+  extensionsPath
+) {
   const dirName = pkgName.replace(/^@[^/]+\//, '');
   const localPath = extensionsPath ? join(extensionsPath, dirName) : undefined;
   const useLocalPath = Boolean(localPath && existsSync(localPath));
@@ -61,7 +66,13 @@ async function installDefaultExtension(kind, pkgName, shopRoot, extensionsPath) 
     path: useLocalPath ? localPath : undefined,
   });
 
-  return installExtension({ shopRoot, kind, source, replace: true, skipDeps: true });
+  return installExtension({
+    shopRoot,
+    kind,
+    source,
+    replace: true,
+    skipDeps: true,
+  });
 }
 
 /**
@@ -256,15 +267,20 @@ export async function installCommand(args = {}) {
     );
     await installDefaultExtension(
       'plugin',
-      '@bermooda/meilisearch',
+      '@bermooda/plugin-meilisearch',
       targetDir,
       extensionsPath
     );
-    await installDefaultExtension('plugin', emailPkg, targetDir, extensionsPath);
+    await installDefaultExtension(
+      'plugin',
+      emailPkg,
+      targetDir,
+      extensionsPath
+    );
 
     await setShopExtensions(targetDir, {
       activeTheme: '@bermooda/theme-default',
-      enabledPlugins: ['@bermooda/meilisearch', emailPkg],
+      enabledPlugins: ['@bermooda/plugin-meilisearch', emailPkg],
     });
   }
 

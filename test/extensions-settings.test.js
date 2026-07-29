@@ -13,7 +13,10 @@ vi.mock('../src/lib/process.js', async (importOriginal) => {
   return {
     ...actual,
     run: (...args) => runMock(...args),
-    loadShopEnv: () => ({ PATH: '/usr/bin', DATABASE_URL: 'file:./prisma/dev.db' }),
+    loadShopEnv: () => ({
+      PATH: '/usr/bin',
+      DATABASE_URL: 'file:./prisma/dev.db',
+    }),
   };
 });
 
@@ -70,12 +73,15 @@ describe('setShopExtensions', () => {
     runMock.mockResolvedValue(0);
 
     await setShopExtensions(shop, {
-      enabledPlugins: ['@bermooda/meilisearch', '@bermooda/plugin-resend'],
+      enabledPlugins: [
+        '@bermooda/plugin-meilisearch',
+        '@bermooda/plugin-resend',
+      ],
     });
 
     const [, , opts] = runMock.mock.calls[0];
     expect(opts.env.BERMOODA_ENABLED_PLUGINS).toBe(
-      '@bermooda/meilisearch,@bermooda/plugin-resend'
+      '@bermooda/plugin-meilisearch,@bermooda/plugin-resend'
     );
     expect(opts.env.BERMOODA_ACTIVE_THEME).toBeUndefined();
     expect(opts.env.BERMOODA_ENABLE_PLUGIN).toBeUndefined();
@@ -103,13 +109,15 @@ describe('setShopExtensions', () => {
 
     await setShopExtensions(shop, {
       activeTheme: '@bermooda/theme-default',
-      enabledPlugins: ['@bermooda/meilisearch'],
+      enabledPlugins: ['@bermooda/plugin-meilisearch'],
       enablePlugin: '@bermooda/plugin-resend',
     });
 
     const [, , opts] = runMock.mock.calls[0];
     expect(opts.env.BERMOODA_ACTIVE_THEME).toBe('@bermooda/theme-default');
-    expect(opts.env.BERMOODA_ENABLED_PLUGINS).toBe('@bermooda/meilisearch');
+    expect(opts.env.BERMOODA_ENABLED_PLUGINS).toBe(
+      '@bermooda/plugin-meilisearch'
+    );
     expect(opts.env.BERMOODA_ENABLE_PLUGIN).toBe('@bermooda/plugin-resend');
   });
 
