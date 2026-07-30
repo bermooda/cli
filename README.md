@@ -42,14 +42,33 @@ bermooda install --local --source /path/to/bermooda --dir ./my-shop -y \
   --store-name 'Demo Shop'
 ```
 
+### Contributor setup
+
+For engineers working on the app and default extensions with nested git
+checkouts (not for merchant installs):
+
+```bash
+bermooda dev-setup --local --dir ./bermooda -y \
+  --admin-email admin@example.com \
+  --admin-password 'TestPass123!' \
+  --store-name 'Demo Shop'
+```
+
+This full-clones `bermooda/bermooda`, then clones `theme-default`,
+`plugin-meilisearch`, and `plugin-resend` into `app/themes/default` and
+`app/plugins/{meilisearch,resend}` (`.git` kept), then bootstraps deps,
+env, DB, admin, and activates those extensions.
+
 ## Commands
 
 | Command                                           | Description                                                      |
 | ------------------------------------------------- | ---------------------------------------------------------------- |
 | `bermooda install [--local\|--server]`            | Download app, deps, env, DB, admin, store                        |
+| `bermooda dev-setup [--local\|--server]`          | Clone app + default extensions as git repos (contributors)       |
 | `bermooda update`                                 | Update shop to latest app version (git ff-only or tarball merge) |
 | `bermooda plugin add\|update\|remove\|list\|help` | Manage `app/plugins/*`                                           |
 | `bermooda theme add\|update\|remove\|list\|help`  | Manage `app/themes/*`                                            |
+| `bermooda mcp init`                               | Write Cursor MCP config for this shop                            |
 | `bermooda dev`                                    | Dev server (no 1Password `op run`)                               |
 | `bermooda start`                                  | Production server (builds if `build/` missing)                   |
 | `bermooda version [--cli\|--shop]`                | Versions                                                         |

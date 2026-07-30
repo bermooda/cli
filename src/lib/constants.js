@@ -30,6 +30,37 @@ export const DEFAULT_BERMOODA_URL = 'http://localhost:3000';
 /** Safe plugin/theme id pattern. */
 export const SAFE_ID_RE = /^[a-z0-9-]+$/;
 
+/**
+ * Default extensions cloned into the shop by `bermooda dev-setup`.
+ * Destinations use `bermooda.slug` under `app/themes/` or `app/plugins/`.
+ * @type {ReadonlyArray<{
+ *   kind: 'theme' | 'plugin',
+ *   slug: string,
+ *   repo: string,
+ *   packageId: string,
+ * }>}
+ */
+export const CONTRIBUTOR_EXTENSIONS = Object.freeze([
+  {
+    kind: 'theme',
+    slug: 'default',
+    repo: 'https://github.com/bermooda/theme-default.git',
+    packageId: '@bermooda/theme-default',
+  },
+  {
+    kind: 'plugin',
+    slug: 'meilisearch',
+    repo: 'https://github.com/bermooda/plugin-meilisearch.git',
+    packageId: '@bermooda/plugin-meilisearch',
+  },
+  {
+    kind: 'plugin',
+    slug: 'resend',
+    repo: 'https://github.com/bermooda/plugin-resend.git',
+    packageId: '@bermooda/plugin-resend',
+  },
+]);
+
 /** Exit codes (see DESIGN.md). */
 export const EXIT = {
   OK: 0,

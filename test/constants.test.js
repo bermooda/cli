@@ -5,6 +5,7 @@ import {
   APP_REPO,
   APP_REPO_SLUG,
   BOOTSTRAP_API_KEY_FILE,
+  CONTRIBUTOR_EXTENSIONS,
   DEFAULT_BERMOODA_URL,
   EXIT,
   MIN_NODE,
@@ -17,6 +18,24 @@ describe('constants', () => {
     expect(APP_REPO_SLUG).toBe('bermooda/bermooda');
     expect(APP_REPO).toContain('github.com/bermooda/bermooda');
     expect(APP_NPM_PACKAGE).toBe('bermooda');
+  });
+
+  it('lists contributor extensions for dev-setup', () => {
+    expect(CONTRIBUTOR_EXTENSIONS).toHaveLength(3);
+    expect(CONTRIBUTOR_EXTENSIONS.map((e) => e.packageId)).toEqual([
+      '@bermooda/theme-default',
+      '@bermooda/plugin-meilisearch',
+      '@bermooda/plugin-resend',
+    ]);
+    expect(CONTRIBUTOR_EXTENSIONS.map((e) => e.slug)).toEqual([
+      'default',
+      'meilisearch',
+      'resend',
+    ]);
+    for (const ext of CONTRIBUTOR_EXTENSIONS) {
+      expect(ext.repo).toMatch(/^https:\/\/github\.com\/bermooda\//);
+      expect(['theme', 'plugin']).toContain(ext.kind);
+    }
   });
 
   it('requires Node matching the app engines floor', () => {

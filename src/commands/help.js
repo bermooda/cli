@@ -1,7 +1,7 @@
 import pc from 'picocolors';
 
 const TOPICS = {
-  install: `bermooda install [--local|--server]
+  'install': `bermooda install [--local|--server]
 
 Download the bermooda app, install dependencies, configure .env, database,
 admin user, store name, and default extensions (theme + Meilisearch + email).
@@ -30,7 +30,33 @@ Environment:
                             Used as a local fallback before npm.
 `,
 
-  update: `bermooda update
+  'dev-setup': `bermooda dev-setup
+
+Contributor setup: full-clone the bermooda app and default extensions
+(theme-default, plugin-meilisearch, plugin-resend) as nested git repos
+under app/themes and app/plugins, then bootstrap deps, .env, database,
+admin user, and activate/enable those extensions.
+
+Not for merchant installs — use bermooda install for that.
+
+Options:
+  --local              Local/dev profile (SQLite default)
+  --server             Server/production profile (PostgreSQL default)
+  --dir <path>         Target directory (default: ./bermooda)
+  --ref <ref>          App git tag/branch (default: repo default branch)
+  --db <sqlite|postgresql>
+  --database-url <url>
+  --admin-email <email>
+  --admin-password <pass>
+  --store-name <name>
+  --skip-deps          Skip npm install
+  --skip-db            Skip migrate/seed and extension settings
+  --force              Replace non-empty target directory (destructive)
+  --force-env          Overwrite existing .env
+  -y, --yes            Non-interactive defaults
+`,
+
+  'update': `bermooda update
 
 Update an existing shop to the latest app version.
 Prefer git fast-forward when .git exists; otherwise merge from tarball.
@@ -41,12 +67,12 @@ Options:
   -y, --yes
 `,
 
-  upgrade: `bermooda upgrade
+  'upgrade': `bermooda upgrade
 
 Upgrade the global @bermooda/cli package to latest.
 `,
 
-  plugin: `bermooda plugin <add|update|remove|list|help> [args]
+  'plugin': `bermooda plugin <add|update|remove|list|help> [args]
 
   plugin add <npm-package> [version]   Install from npm into app/plugins/<id>
   plugin update <npm-package> [version]
@@ -62,7 +88,7 @@ Alternate sources: --path, --git, --tarball
   --enable             Enable after add (writes shop settings via scripts/cli-set-extensions.mjs)
 `,
 
-  theme: `bermooda theme <add|update|remove|list|help> [args]
+  'theme': `bermooda theme <add|update|remove|list|help> [args]
 
   theme add <npm-package> [version]    Install from npm into app/themes/<id>
   theme update <npm-package> [version]
@@ -78,22 +104,22 @@ Alternate sources: --path, --git, --tarball
   --activate           Set activeTheme after add (writes shop settings via scripts/cli-set-extensions.mjs)
 `,
 
-  start: `bermooda start
+  'start': `bermooda start
 
 Production server (npm run start). Builds first if build/ is missing.
 `,
 
-  dev: `bermooda dev
+  'dev': `bermooda dev
 
 Development server (npx react-router dev). Loads .env without 1Password op run.
 `,
 
-  version: `bermooda version [--cli|--shop]
+  'version': `bermooda version [--cli|--shop]
 
 Show CLI and/or shop versions.
 `,
 
-  mcp: `bermooda mcp init [--url <url>] [--key <key>]
+  'mcp': `bermooda mcp init [--url <url>] [--key <key>]
 
 Write .cursor/mcp.json for Cursor (and a hint for Claude Desktop) using
 BERMOODA_URL + BERMOODA_API_KEY from shop .env, or .bermooda/bootstrap-api-key.
@@ -129,6 +155,7 @@ ${pc.bold('Usage:')}
 
 ${pc.bold('Commands:')}
   install     Create a new shop from the latest app release
+  dev-setup   Clone app + default extensions for contributors
   update      Update shop app code to latest
   plugin      Manage plugins (add|update|remove|list|help)
   theme       Manage themes (add|update|remove|list|help)
