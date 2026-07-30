@@ -176,17 +176,21 @@ function embeddedVersion(name) {
 }
 
 /**
- * Install a resolved extension into the shop and merge peer/extra deps.
+ * Install a resolved extension into the shop and install its dependencies.
  * @param {{
  *   shopRoot: string,
  *   kind: 'plugin' | 'theme',
  *   source: ResolvedExtensionSource,
  *   replace?: boolean,
  *   skipDeps?: boolean,
+ *   skipShopDeps?: boolean,
+ *   skipLocalDeps?: boolean,
  * }} opts
  */
 export async function installExtension(opts) {
   const { shopRoot, kind, source, replace = false, skipDeps = false } = opts;
+  const skipShopDeps = opts.skipShopDeps ?? skipDeps;
+  const skipLocalDeps = opts.skipLocalDeps ?? skipDeps;
   const { sourceDir, id, cleanup } = source;
 
   try {
@@ -199,7 +203,7 @@ export async function installExtension(opts) {
       id,
     });
 
-    installFromPath({
+    const destRoot = installFromPath({
       shopRoot,
       kind,
       id,
@@ -207,8 +211,14 @@ export async function installExtension(opts) {
       replace,
     });
 
-    if (!skipDeps) {
-      await mergeExtensionDependencies(shopRoot, sourceDir);
+    // Peer / bermooda.dependencies → shop root (shared with the app)
+    if (!skipShopDeps) {
+      await mergeExtensionDependencies(shopRoot, destRoot);
+    }
+
+    // Extension-owned dependencies → app/plugins|themes/<id>/node_modules
+    if (!skipLocalDeps) {
+      await installExtensionLocalDependencies(destRoot);
     }
 
     return id;
@@ -243,6 +253,30 @@ export async function mergeExtensionDependencies(shopRoot, packageDir) {
   const code = await npm(shopRoot, ['install']);
   if (code !== 0) {
     error('npm install failed after merging extension dependencies');
+    process.exit(EXIT.DEPS);
+  }
+}
+
+/**
+ * Install dependencies declared in an extension's own package.json into that
+ * extension directory (app/plugins|themes/<id>/node_modules).
+ * @param {string} extensionDir
+ */
+export async function installExtensionLocalDependencies(extensionDir) {
+  const pkg = readPackageJson(extensionDir);
+  if (!pkg) return;
+
+  /** @type {Record<string, string>} */
+  const deps = {
+    ...(pkg.dependencies ?? {}),
+    ...(pkg.optionalDependencies ?? {}),
+  };
+  if (Object.keys(deps).length === 0) return;
+
+  info(`Installing dependencies for ${pkg.name ?? extensionDir}…`);
+  const code = await npm(extensionDir, ['install']);
+  if (code !== 0) {
+    error(`npm install failed in ${extensionDir}`);
     process.exit(EXIT.DEPS);
   }
 }

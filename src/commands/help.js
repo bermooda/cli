@@ -84,7 +84,7 @@ Default source is the npm package name (official + third-party), e.g.:
   bermooda plugin add @bermooda/plugin-subscriptions
 
 Alternate sources: --path, --git, --tarball
-  --skip-deps          Skip merging peer deps / npm install
+  --skip-deps          Skip shop peer-dep merge and extension-local npm install
   --enable             Enable after add (writes shop settings via scripts/cli-set-extensions.mjs)
 `,
 
@@ -100,7 +100,7 @@ Default source is the npm package name (official + third-party), e.g.:
   bermooda theme add @bermooda/theme-paper
 
 Alternate sources: --path, --git, --tarball
-  --skip-deps          Skip merging peer deps / npm install
+  --skip-deps          Skip shop peer-dep merge and extension-local npm install
   --activate           Set activeTheme after add (writes shop settings via scripts/cli-set-extensions.mjs)
 `,
 

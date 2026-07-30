@@ -142,7 +142,7 @@ Alternate sources for add/update:
   --path <dir>
   --git <url>#ref
   --tarball <url>
-  --skip-deps      Skip merging peer deps / npm install
+  --skip-deps      Skip shop peer-dep merge and extension-local npm install
   --activate       Set activeTheme after add (writes shop settings)
 `);
 }

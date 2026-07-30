@@ -83,7 +83,13 @@ describe('devSetupCommand', () => {
         seedMinimalAppTree(dest);
       } else {
         mkdirSync(dest, { recursive: true });
-        writeFileSync(join(dest, 'package.json'), '{}\n');
+        writeFileSync(
+          join(dest, 'package.json'),
+          JSON.stringify({
+            name: 'ext',
+            dependencies: { 'left-pad': '1.0.0' },
+          })
+        );
       }
     });
     npmMock.mockResolvedValue(0);
@@ -141,6 +147,13 @@ describe('devSetupCommand', () => {
     }
 
     expect(npmMock).toHaveBeenCalledWith(targetDir, ['install']);
+    for (const ext of CONTRIBUTOR_EXTENSIONS) {
+      const dest =
+        ext.kind === 'plugin'
+          ? join(targetDir, 'app', 'plugins', ext.slug)
+          : join(targetDir, 'app', 'themes', ext.slug);
+      expect(npmMock).toHaveBeenCalledWith(dest, ['install']);
+    }
     expect(setupDatabaseMock).toHaveBeenCalledWith(targetDir, {
       provider: 'sqlite',
     });
