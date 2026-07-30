@@ -139,7 +139,7 @@ Alternate sources for add/update:
   --path <dir>     Install from local directory
   --git <url>#ref  Install from git
   --tarball <url>  Install from HTTPS tarball
-  --skip-deps      Skip merging peer deps / npm install
+  --skip-deps      Skip shop peer-dep merge and extension-local npm install
   --enable         Enable after install (writes shop settings)
 `);
 }

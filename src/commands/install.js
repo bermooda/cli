@@ -71,7 +71,9 @@ async function installDefaultExtension(
     kind,
     source,
     replace: true,
-    skipDeps: true,
+    // Shop root npm install already ran; still install each extension's
+    // own package.json dependencies into app/plugins|themes/<id>.
+    skipShopDeps: true,
   });
 }
 

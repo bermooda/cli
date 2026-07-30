@@ -24,6 +24,7 @@ import {
   readEnvExample,
   writeEnvFile,
 } from '../lib/env.js';
+import { installExtensionLocalDependencies } from '../lib/extension-source.js';
 import { setShopExtensions } from '../lib/extensions-settings.js';
 import { gitClone } from '../lib/git-clone.js';
 import { error, info, success } from '../lib/logger.js';
@@ -134,6 +135,14 @@ export async function devSetupCommand(args = {}) {
       process.exit(EXIT.DEPS);
     }
     success('Dependencies installed');
+
+    for (const ext of CONTRIBUTOR_EXTENSIONS) {
+      const destRoot =
+        ext.kind === 'plugin'
+          ? join(targetDir, 'app', 'plugins', ext.slug)
+          : join(targetDir, 'app', 'themes', ext.slug);
+      await installExtensionLocalDependencies(destRoot);
+    }
   }
 
   /** @type {'sqlite' | 'postgresql'} */

@@ -12,6 +12,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   installExtension,
+  installExtensionLocalDependencies,
   mergeExtensionDependencies,
   resolveExtensionSource,
 } from '../src/lib/extension-source.js';
@@ -196,6 +197,123 @@ describe('resolveExtensionSource + installExtension', () => {
     expect(shopPkg.dependencies.leftpad).toBe('1.0.0');
     expect(shopPkg.dependencies['extra-lib']).toBe('^2.0.0');
     expect(npmSpy).toHaveBeenCalled();
+    npmSpy.mockRestore();
+  });
+
+  it('installExtensionLocalDependencies runs npm install in the extension dir', async () => {
+    const pkgDir = mkdtempSync(join(tmpdir(), 'ext-local-deps-'));
+    cleanups.push(pkgDir);
+    writeFileSync(
+      join(pkgDir, 'package.json'),
+      JSON.stringify({
+        name: '@bermooda/plugin-x',
+        dependencies: { 'left-pad': '1.0.0' },
+      })
+    );
+
+    const npmMod = await import('../src/lib/process.js');
+    const npmSpy = vi.spyOn(npmMod, 'npm').mockResolvedValue(0);
+
+    await installExtensionLocalDependencies(pkgDir);
+
+    expect(npmSpy).toHaveBeenCalledWith(pkgDir, ['install']);
+    npmSpy.mockRestore();
+  });
+
+  it('installExtensionLocalDependencies no-ops when there are no local deps', async () => {
+    const pkgDir = mkdtempSync(join(tmpdir(), 'ext-no-deps-'));
+    cleanups.push(pkgDir);
+    writeFileSync(
+      join(pkgDir, 'package.json'),
+      JSON.stringify({
+        name: '@bermooda/plugin-x',
+        peerDependencies: { zod: '^3.0.0' },
+      })
+    );
+
+    const npmMod = await import('../src/lib/process.js');
+    const npmSpy = vi.spyOn(npmMod, 'npm').mockResolvedValue(0);
+
+    await installExtensionLocalDependencies(pkgDir);
+
+    expect(npmSpy).not.toHaveBeenCalled();
+    npmSpy.mockRestore();
+  });
+
+  it('installExtension installs local package.json deps into the destination', async () => {
+    const pkgDir = createFixturePlugin('with-deps');
+    writeFileSync(
+      join(pkgDir, 'package.json'),
+      JSON.stringify({
+        name: '@bermooda/plugin-with-deps',
+        version: '1.0.0',
+        bermooda: { id: 'with-deps', engine: '>=0.0.0' },
+        dependencies: { 'is-number': '7.0.0' },
+        peerDependencies: { zod: '^3.0.0' },
+      })
+    );
+    cleanups.push(pkgDir);
+
+    const shop = createFixtureShop();
+    cleanups.push(shop);
+
+    const npmMod = await import('../src/lib/process.js');
+    const npmSpy = vi.spyOn(npmMod, 'npm').mockResolvedValue(0);
+
+    const id = await installExtension({
+      shopRoot: shop,
+      kind: 'plugin',
+      source: { sourceDir: pkgDir, id: 'with-deps' },
+    });
+
+    expect(id).toBe('with-deps');
+    const dest = join(shop, 'app', 'plugins', 'with-deps');
+    // Shop peer merge + local extension install
+    expect(npmSpy).toHaveBeenCalledWith(shop, ['install']);
+    expect(npmSpy).toHaveBeenCalledWith(dest, ['install']);
+
+    const shopPkg = JSON.parse(
+      readFileSync(join(shop, 'package.json'), 'utf8')
+    );
+    expect(shopPkg.dependencies.zod).toBe('^3.0.0');
+    npmSpy.mockRestore();
+  });
+
+  it('installExtension skipShopDeps still installs local deps', async () => {
+    const pkgDir = createFixturePlugin('local-only');
+    writeFileSync(
+      join(pkgDir, 'package.json'),
+      JSON.stringify({
+        name: '@bermooda/plugin-local-only',
+        version: '1.0.0',
+        bermooda: { id: 'local-only', engine: '>=0.0.0' },
+        dependencies: { 'is-odd': '3.0.0' },
+        peerDependencies: { zod: '^3.0.0' },
+      })
+    );
+    cleanups.push(pkgDir);
+
+    const shop = createFixtureShop();
+    cleanups.push(shop);
+
+    const npmMod = await import('../src/lib/process.js');
+    const npmSpy = vi.spyOn(npmMod, 'npm').mockResolvedValue(0);
+
+    await installExtension({
+      shopRoot: shop,
+      kind: 'plugin',
+      source: { sourceDir: pkgDir, id: 'local-only' },
+      skipShopDeps: true,
+    });
+
+    const dest = join(shop, 'app', 'plugins', 'local-only');
+    expect(npmSpy).toHaveBeenCalledWith(dest, ['install']);
+    expect(npmSpy).not.toHaveBeenCalledWith(shop, ['install']);
+
+    const shopPkg = JSON.parse(
+      readFileSync(join(shop, 'package.json'), 'utf8')
+    );
+    expect(shopPkg.dependencies?.zod).toBeUndefined();
     npmSpy.mockRestore();
   });
 

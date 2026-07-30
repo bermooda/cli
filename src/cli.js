@@ -233,7 +233,8 @@ const main = defineCommand({
             tarball: { type: 'string' },
             skipDeps: {
               type: 'boolean',
-              description: 'Skip merging peer deps / npm install',
+              description:
+                'Skip shop peer-dep merge and extension-local npm install',
               default: false,
             },
             enable: { type: 'boolean', default: false },
@@ -251,7 +252,8 @@ const main = defineCommand({
             tarball: { type: 'string' },
             skipDeps: {
               type: 'boolean',
-              description: 'Skip merging peer deps / npm install',
+              description:
+                'Skip shop peer-dep merge and extension-local npm install',
               default: false,
             },
           },
@@ -292,7 +294,8 @@ const main = defineCommand({
             tarball: { type: 'string' },
             skipDeps: {
               type: 'boolean',
-              description: 'Skip merging peer deps / npm install',
+              description:
+                'Skip shop peer-dep merge and extension-local npm install',
               default: false,
             },
             activate: { type: 'boolean', default: false },
@@ -310,7 +313,8 @@ const main = defineCommand({
             tarball: { type: 'string' },
             skipDeps: {
               type: 'boolean',
-              description: 'Skip merging peer deps / npm install',
+              description:
+                'Skip shop peer-dep merge and extension-local npm install',
               default: false,
             },
           },
