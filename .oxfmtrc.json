@@ -70,5 +70,11 @@
   },
   "printWidth": 80,
   "sortPackageJson": false,
-  "ignorePatterns": [".github/**", "dist/**", "coverage/**", "node_modules/**"]
+  "ignorePatterns": [
+    ".github/**",
+    "dist/**",
+    "coverage/**",
+    "node_modules/**",
+    "CHANGELOG.md"
+  ]
 }
