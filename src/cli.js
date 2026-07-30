@@ -2,6 +2,7 @@
 
 import { defineCommand, runMain } from 'citty';
 
+import { devSetupCommand } from './commands/dev-setup.js';
 import { devCommand } from './commands/dev.js';
 import { helpCommand } from './commands/help.js';
 import { installCommand } from './commands/install.js';
@@ -73,7 +74,7 @@ const main = defineCommand({
   },
   args: globalArgs,
   subCommands: {
-    install: defineCommand({
+    'install': defineCommand({
       meta: {
         name: 'install',
         description: 'Create a new shop from the bermooda app repository',
@@ -119,7 +120,47 @@ const main = defineCommand({
       run: wrap(installCommand),
     }),
 
-    update: defineCommand({
+    'dev-setup': defineCommand({
+      meta: {
+        name: 'dev-setup',
+        description:
+          'Clone app + default extensions as git repos and bootstrap for contributors',
+      },
+      args: {
+        ...globalArgs,
+        local: { type: 'boolean', description: 'Local install profile' },
+        server: { type: 'boolean', description: 'Server install profile' },
+        dir: { type: 'string', description: 'Target directory' },
+        ref: {
+          type: 'string',
+          description:
+            'App git tag or branch (default: repository default branch)',
+        },
+        db: { type: 'string', description: 'sqlite | postgresql' },
+        databaseUrl: { type: 'string', description: 'DATABASE_URL' },
+        adminEmail: { type: 'string', description: 'Admin email' },
+        adminPassword: { type: 'string', description: 'Admin password' },
+        storeName: { type: 'string', description: 'Store display name' },
+        skipDeps: { type: 'boolean', description: 'Skip npm install' },
+        skipDb: { type: 'boolean', description: 'Skip migrate/seed' },
+        force: {
+          type: 'boolean',
+          description: 'Replace non-empty target directory',
+        },
+        forceEnv: { type: 'boolean', description: 'Overwrite .env' },
+        noInteractive: {
+          type: 'boolean',
+          description: 'Fail if prompts would be required',
+        },
+        withDemo: {
+          type: 'boolean',
+          description: 'Include demo catalog on server install',
+        },
+      },
+      run: wrap(devSetupCommand),
+    }),
+
+    'update': defineCommand({
       meta: {
         name: 'update',
         description: 'Update shop app code to latest',
@@ -132,7 +173,7 @@ const main = defineCommand({
       run: wrap(updateCommand),
     }),
 
-    upgrade: defineCommand({
+    'upgrade': defineCommand({
       meta: {
         name: 'upgrade',
         description: 'Upgrade @bermooda/cli globally',
@@ -141,7 +182,7 @@ const main = defineCommand({
       run: wrap(upgradeCommand),
     }),
 
-    dev: defineCommand({
+    'dev': defineCommand({
       meta: { name: 'dev', description: 'Start development server' },
       args: {
         ...globalArgs,
@@ -150,13 +191,13 @@ const main = defineCommand({
       run: wrap(devCommand),
     }),
 
-    start: defineCommand({
+    'start': defineCommand({
       meta: { name: 'start', description: 'Start production server' },
       args: globalArgs,
       run: wrap(startCommand),
     }),
 
-    version: defineCommand({
+    'version': defineCommand({
       meta: { name: 'version', description: 'Show CLI and/or shop version' },
       args: {
         ...globalArgs,
@@ -166,7 +207,7 @@ const main = defineCommand({
       run: wrap(versionCommand),
     }),
 
-    help: defineCommand({
+    'help': defineCommand({
       meta: { name: 'help', description: 'Show help' },
       args: {
         command: {
@@ -178,7 +219,7 @@ const main = defineCommand({
       run: wrap(helpCommand),
     }),
 
-    plugin: defineCommand({
+    'plugin': defineCommand({
       meta: { name: 'plugin', description: 'Manage plugins' },
       subCommands: {
         add: defineCommand({
@@ -237,7 +278,7 @@ const main = defineCommand({
       // No parent `run` — citty invokes parent+child run when both exist.
     }),
 
-    theme: defineCommand({
+    'theme': defineCommand({
       meta: { name: 'theme', description: 'Manage themes' },
       subCommands: {
         add: defineCommand({
@@ -295,7 +336,7 @@ const main = defineCommand({
       },
     }),
 
-    mcp: defineCommand({
+    'mcp': defineCommand({
       meta: { name: 'mcp', description: 'MCP server configuration' },
       subCommands: {
         init: defineCommand({
