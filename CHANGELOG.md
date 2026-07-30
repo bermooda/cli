@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/bermooda/cli/compare/v1.1.0...v1.2.0) (2026-07-30)
+
+
+### Features
+
+* install extension-local package.json dependencies ([#17](https://github.com/bermooda/cli/issues/17)) ([deb78b2](https://github.com/bermooda/cli/commit/deb78b2e032f129e4f543af74c33b1f45e085a80))
+
 ## [1.1.0](https://github.com/bermooda/cli/compare/v1.0.0...v1.1.0) (2026-07-30)
 
 
