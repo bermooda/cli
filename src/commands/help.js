@@ -18,6 +18,9 @@ Options:
   --store-name <name>
   --email-provider <resend|sendgrid|aws-ses>
                        Email provider for transactional mail (default: resend)
+  --base-url <url>     Public site URL for bermooda.config.js (required for
+                       server --yes installs)
+  --from-email <addr>  Transactional from address (email.fromNoReply)
   --skip-deps          Skip npm install
   --skip-db            Skip migrate/seed and extension install
   --force              Allow non-empty target directory
@@ -49,6 +52,7 @@ Options:
   --admin-email <email>
   --admin-password <pass>
   --store-name <name>
+  --from-email <addr>  Transactional from address (email.fromNoReply)
   --skip-deps          Skip npm install
   --skip-db            Skip migrate/seed and extension settings
   --force              Replace non-empty target directory (destructive)

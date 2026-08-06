@@ -116,6 +116,14 @@ const main = defineCommand({
           description:
             'Email provider: resend|sendgrid|aws-ses (default: resend)',
         },
+        baseUrl: {
+          type: 'string',
+          description: 'Public site URL written to bermooda.config.js',
+        },
+        fromEmail: {
+          type: 'string',
+          description: 'Transactional from address (email.fromNoReply)',
+        },
       },
       run: wrap(installCommand),
     }),
@@ -155,6 +163,10 @@ const main = defineCommand({
         withDemo: {
           type: 'boolean',
           description: 'Include demo catalog on server install',
+        },
+        fromEmail: {
+          type: 'string',
+          description: 'Transactional from address (email.fromNoReply)',
         },
       },
       run: wrap(devSetupCommand),
