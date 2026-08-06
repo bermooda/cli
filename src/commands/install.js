@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path';
 
 import * as p from '@clack/prompts';
 
+import { writeBermoodaConfig } from '../lib/bermooda-config.js';
 import { bootstrapShop } from '../lib/bootstrap.js';
 import { APP_REPO_SLUG, EXIT, PROJECT_JSON } from '../lib/constants.js';
 import { setupDatabase } from '../lib/db.js';
@@ -26,6 +27,12 @@ import {
   selectOrDefault,
   textOrDefault,
 } from '../lib/prompts.js';
+
+/** Default from-address used with --yes / non-interactive install. */
+export const DEFAULT_FROM_NO_REPLY = 'bermooda <noreply@example.com>';
+
+/** Default public URL for local --yes installs (required for `bermooda start`). */
+export const DEFAULT_LOCAL_BASE_URL = 'http://localhost:3000';
 
 /**
  * Maps email provider ids to their npm package names.
@@ -205,6 +212,52 @@ export async function installCommand(args = {}) {
   const storeName =
     args.storeName ?? (await textOrDefault(ctx, 'Store name', 'My Store'));
 
+  const defaultBaseUrl =
+    mode === 'local' ? DEFAULT_LOCAL_BASE_URL : 'https://shop.example.com';
+  let baseUrl = args.baseUrl;
+  if (!baseUrl) {
+    if (yes || !interactive) {
+      if (mode === 'server') {
+        error(
+          'baseUrl is required for server install (pass --base-url or run interactively)'
+        );
+        process.exit(EXIT.USER);
+      }
+      baseUrl = DEFAULT_LOCAL_BASE_URL;
+      info(`Using default baseUrl ${baseUrl}`);
+    } else {
+      baseUrl = await textOrDefault(
+        ctx,
+        'Public site URL (baseUrl)',
+        defaultBaseUrl
+      );
+    }
+  }
+  baseUrl = String(baseUrl).trim().replace(/\/+$/, '');
+  if (!baseUrl) {
+    error('baseUrl is required');
+    process.exit(EXIT.USER);
+  }
+
+  let fromNoReply = args.fromEmail;
+  if (!fromNoReply) {
+    if (yes || !interactive) {
+      fromNoReply = DEFAULT_FROM_NO_REPLY;
+      info(`Using default from email ${fromNoReply}`);
+    } else {
+      fromNoReply = await textOrDefault(
+        ctx,
+        'From email for transactional mail (fromNoReply)',
+        DEFAULT_FROM_NO_REPLY
+      );
+    }
+  }
+  fromNoReply = String(fromNoReply).trim();
+  if (!fromNoReply) {
+    error('fromNoReply / --from-email is required');
+    process.exit(EXIT.USER);
+  }
+
   // Email provider — resolved early so all prompts are upfront before long ops.
   // Actual extension install happens after DB bootstrap.
   /** @type {string} */
@@ -246,6 +299,9 @@ export async function installCommand(args = {}) {
   const example = readEnvExample(targetDir);
   const envContent = buildEnvFile(example, overrides);
   writeEnvFile(targetDir, envContent, { force: Boolean(args.forceEnv) });
+
+  writeBermoodaConfig(targetDir, { baseUrl, fromNoReply });
+  success('Wrote bermooda.config.js');
 
   if (!args.skipDb) {
     await setupDatabase(targetDir, {

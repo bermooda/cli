@@ -9,6 +9,7 @@ import { join, resolve } from 'node:path';
 
 import * as p from '@clack/prompts';
 
+import { writeBermoodaConfig } from '../lib/bermooda-config.js';
 import { bootstrapShop } from '../lib/bootstrap.js';
 import {
   APP_REPO,
@@ -35,6 +36,9 @@ import {
   selectOrDefault,
   textOrDefault,
 } from '../lib/prompts.js';
+
+/** Default from-address used with --yes / non-interactive dev-setup. */
+export const DEFAULT_FROM_NO_REPLY = 'bermooda <noreply@example.com>';
 
 /**
  * Contributor setup: full-clone the app + default extensions as nested git
@@ -185,6 +189,25 @@ export async function devSetupCommand(args = {}) {
   const storeName =
     args.storeName ?? (await textOrDefault(ctx, 'Store name', 'My Store'));
 
+  let fromNoReply = args.fromEmail;
+  if (!fromNoReply) {
+    if (yes || !interactive) {
+      fromNoReply = DEFAULT_FROM_NO_REPLY;
+      info(`Using default from email ${fromNoReply}`);
+    } else {
+      fromNoReply = await textOrDefault(
+        ctx,
+        'From email for transactional mail (fromNoReply)',
+        DEFAULT_FROM_NO_REPLY
+      );
+    }
+  }
+  fromNoReply = String(fromNoReply).trim();
+  if (!fromNoReply) {
+    error('fromNoReply / --from-email is required');
+    process.exit(EXIT.USER);
+  }
+
   const overrides = defaultEnvOverrides(mode, {
     databaseUrl:
       databaseUrl ?? (db === 'sqlite' ? 'file:./prisma/dev.db' : undefined),
@@ -200,6 +223,10 @@ export async function devSetupCommand(args = {}) {
   const example = readEnvExample(targetDir);
   const envContent = buildEnvFile(example, overrides);
   writeEnvFile(targetDir, envContent, { force: Boolean(args.forceEnv) });
+
+  // Dev setup omits baseUrl so `#/libs/config` uses the localhost auto-URL.
+  writeBermoodaConfig(targetDir, { fromNoReply });
+  success('Wrote bermooda.config.js');
 
   if (!args.skipDb) {
     await setupDatabase(targetDir, {
