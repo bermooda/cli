@@ -35,22 +35,11 @@ export const DEFAULT_FROM_NO_REPLY = 'bermooda <noreply@example.com>';
 export const DEFAULT_LOCAL_BASE_URL = 'http://localhost:3000';
 
 /**
- * Maps email provider ids to their npm package names.
- * Exported for unit testing.
- * @type {Record<string, string>}
- */
-export const EMAIL_PROVIDER_PACKAGES = {
-  'resend': '@bermooda/plugin-resend',
-  'sendgrid': '@bermooda/plugin-sendgrid',
-  'aws-ses': '@bermooda/plugin-aws-ses',
-};
-
-/**
  * Install a default extension from npm or a local sibling path.
  *
  * When BERMOODA_EXTENSIONS_PATH is set, checks for a subdirectory matching
- * the package name without the @bermooda/ scope (e.g. theme-default, plugin-resend).
- * Falls back to npm if the local path does not exist.
+ * the package name without the @bermooda/ scope (e.g. theme-default,
+ * plugin-meilisearch). Falls back to npm if the local path does not exist.
  *
  * @param {'theme' | 'plugin'} kind
  * @param {string} pkgName  Full npm package name, e.g. @bermooda/theme-default
@@ -258,31 +247,6 @@ export async function installCommand(args = {}) {
     process.exit(EXIT.USER);
   }
 
-  // Email provider — resolved early so all prompts are upfront before long ops.
-  // Actual extension install happens after DB bootstrap.
-  /** @type {string} */
-  let emailProvider = args.emailProvider ?? 'resend';
-  if (!args.emailProvider && interactive && !args.skipDb) {
-    emailProvider = await selectOrDefault(
-      ctx,
-      'Email provider for transactional mail',
-      [
-        { value: 'resend', label: 'Resend (recommended)' },
-        { value: 'sendgrid', label: 'SendGrid' },
-        { value: 'aws-ses', label: 'AWS SES' },
-      ],
-      emailProvider
-    );
-  }
-
-  const emailPkg = EMAIL_PROVIDER_PACKAGES[emailProvider];
-  if (!args.skipDb && !emailPkg) {
-    error(
-      `Unknown email provider "${emailProvider}". Valid options: ${Object.keys(EMAIL_PROVIDER_PACKAGES).join(', ')}`
-    );
-    process.exit(EXIT.USER);
-  }
-
   const overrides = defaultEnvOverrides(mode, {
     databaseUrl:
       databaseUrl ?? (db === 'sqlite' ? 'file:./prisma/dev.db' : undefined),
@@ -314,7 +278,7 @@ export async function installCommand(args = {}) {
       minimal: mode === 'server' && !args.withDemo,
     });
 
-    // Install default theme and plugins, then write settings.
+    // Install default theme and Meilisearch, then write settings.
     const extensionsPath = process.env.BERMOODA_EXTENSIONS_PATH;
     info('Installing default theme and plugins…');
     await installDefaultExtension(
@@ -329,16 +293,10 @@ export async function installCommand(args = {}) {
       targetDir,
       extensionsPath
     );
-    await installDefaultExtension(
-      'plugin',
-      emailPkg,
-      targetDir,
-      extensionsPath
-    );
 
     await setShopExtensions(targetDir, {
       activeTheme: '@bermooda/theme-default',
-      enabledPlugins: ['@bermooda/plugin-meilisearch', emailPkg],
+      enabledPlugins: ['@bermooda/plugin-meilisearch'],
     });
   }
 

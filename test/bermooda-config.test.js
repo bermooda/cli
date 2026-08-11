@@ -30,7 +30,7 @@ describe('buildBermoodaConfigSource', () => {
     expect(src).toContain('export default config');
   });
 
-  it('comments baseUrl when omitted (dev-setup)', () => {
+  it('comments baseUrl when omitted', () => {
     const src = buildBermoodaConfigSource({
       fromNoReply: 'bermooda <noreply@example.com>',
     });
