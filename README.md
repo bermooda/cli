@@ -52,7 +52,6 @@ default theme via `npm run extensions:install`):
 git clone https://github.com/<you>/bermooda.git
 cd bermooda
 npm install
-cp .env.example .env
 npm run setup
 ```
 
