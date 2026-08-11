@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/bermooda/cli/compare/v1.3.0...v2.0.0) (2026-08-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove bermooda dev-setup and email provider install step ([#21](https://github.com/bermooda/cli/issues/21))
+
+### Features
+
+* remove bermooda dev-setup and email provider install step ([#21](https://github.com/bermooda/cli/issues/21)) ([383e98c](https://github.com/bermooda/cli/commit/383e98c4de5baf78321e3d127552386dcb6a133e))
+
 ## [1.3.0](https://github.com/bermooda/cli/compare/v1.2.0...v1.3.0) (2026-08-06)
 
 
