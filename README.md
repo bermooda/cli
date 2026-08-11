@@ -44,27 +44,26 @@ bermooda install --local --source /path/to/bermooda --dir ./my-shop -y \
 
 ### Contributor setup
 
-For engineers working on the app and default extensions with nested git
-checkouts (not for merchant installs):
+Fork and clone [bermooda/bermooda](https://github.com/bermooda/bermooda), then
+run setup inside that checkout (installs deps prerequisites, Prisma, and the
+default theme via `npm run extensions:install`):
 
 ```bash
-bermooda dev-setup --local --dir ./bermooda -y \
-  --admin-email admin@example.com \
-  --admin-password 'TestPass123!' \
-  --store-name 'Demo Shop'
+git clone https://github.com/<you>/bermooda.git
+cd bermooda
+npm install
+cp .env.example .env
+npm run setup
 ```
 
-This full-clones `bermooda/bermooda`, then clones `theme-default`,
-`plugin-meilisearch`, and `plugin-resend` into `app/themes/default` and
-`app/plugins/{meilisearch,resend}` (`.git` kept), then bootstraps deps,
-env, DB, admin, and activates those extensions.
+Do not use `bermooda install` for platform contribution — that scaffolds a
+merchant shop from the published app package.
 
 ## Commands
 
 | Command                                           | Description                                                      |
 | ------------------------------------------------- | ---------------------------------------------------------------- |
 | `bermooda install [--local\|--server]`            | Download app, deps, env, DB, admin, store                        |
-| `bermooda dev-setup [--local\|--server]`          | Clone app + default extensions as git repos (contributors)       |
 | `bermooda update`                                 | Update shop to latest app version (git ff-only or tarball merge) |
 | `bermooda plugin add\|update\|remove\|list\|help` | Manage `app/plugins/*`                                           |
 | `bermooda theme add\|update\|remove\|list\|help`  | Manage `app/themes/*`                                            |

@@ -11,7 +11,7 @@ function escapeSingleQuoted(value) {
 }
 
 /**
- * Build bermooda.config.js source from install/dev-setup answers.
+ * Build bermooda.config.js source from install answers.
  *
  * @param {{ baseUrl?: string | null, fromNoReply: string }} opts
  * @returns {string}
