@@ -1,6 +1,6 @@
 import { existsSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 
 import { EXIT } from './constants.js';
 import { assertEngineCompatible } from './engine.js';
@@ -258,8 +258,40 @@ export async function mergeExtensionDependencies(shopRoot, packageDir) {
 }
 
 /**
+ * Shop-operator env var that opts extensions in to npm lifecycle scripts.
+ * Same name and values as the shop's `install-extension-deps`.
+ */
+export const EXTENSION_INSTALL_SCRIPTS_ENV =
+  'BERMOODA_EXTENSION_INSTALL_SCRIPTS';
+
+const ALLOW_ALL_INSTALL_SCRIPTS = new Set(['1', 'true', 'all']);
+
+/**
+ * Whether npm lifecycle scripts (`preinstall`, `postinstall`, …) may run when
+ * installing an extension's own dependencies.
+ *
+ * Off by default: they would run third-party code with the operator's
+ * environment (env vars, registry tokens). Only the operator can opt in:
+ * `1` / `true` / `all` for every extension, or a comma list of
+ * `<kind>/<folder>` such as `plugins/resend,themes/default`. An extension's
+ * own package.json cannot opt itself in.
+ *
+ * @param {string} extensionDir `app/<plugins|themes>/<folder>`
+ * @param {string | undefined} setting Value of the env var
+ * @returns {boolean}
+ */
+export function extensionInstallScriptsAllowed(extensionDir, setting) {
+  const value = (setting ?? '').trim().toLowerCase();
+  if (ALLOW_ALL_INSTALL_SCRIPTS.has(value)) return true;
+  const id =
+    `${basename(dirname(extensionDir))}/${basename(extensionDir)}`.toLowerCase();
+  return value.split(',').some((entry) => entry.trim() === id);
+}
+
+/**
  * Install dependencies declared in an extension's own package.json into that
- * extension directory (app/plugins|themes/<id>/node_modules).
+ * extension directory (app/plugins|themes/<id>/node_modules). Skips npm
+ * lifecycle scripts unless {@link extensionInstallScriptsAllowed}.
  * @param {string} extensionDir
  */
 export async function installExtensionLocalDependencies(extensionDir) {
@@ -273,8 +305,18 @@ export async function installExtensionLocalDependencies(extensionDir) {
   };
   if (Object.keys(deps).length === 0) return;
 
-  info(`Installing dependencies for ${pkg.name ?? extensionDir}…`);
-  const code = await npm(extensionDir, ['install']);
+  const allowScripts = extensionInstallScriptsAllowed(
+    extensionDir,
+    process.env[EXTENSION_INSTALL_SCRIPTS_ENV]
+  );
+  info(
+    `Installing dependencies for ${pkg.name ?? extensionDir}…` +
+      (allowScripts ? ' (lifecycle scripts allowed)' : '')
+  );
+  const code = await npm(
+    extensionDir,
+    allowScripts ? ['install'] : ['install', '--ignore-scripts']
+  );
   if (code !== 0) {
     error(`npm install failed in ${extensionDir}`);
     process.exit(EXIT.DEPS);

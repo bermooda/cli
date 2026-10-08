@@ -110,6 +110,24 @@ bermooda theme list
 If the npm package is not found, the CLI falls back to the bermooda registry
 (when configured). Registry URL: `BERMOODA_REGISTRY_URL` or builtin stub.
 
+### Extension dependency install scripts
+
+`plugin add|update` and `theme add|update` install an extension's own
+`dependencies` into `app/<plugins|themes>/<folder>/node_modules` with
+`npm install --ignore-scripts`, so dependency `preinstall` / `postinstall`
+scripts don't run third-party code with your environment. Opt in with
+`BERMOODA_EXTENSION_INSTALL_SCRIPTS`: `1` / `true` / `all` for every extension,
+or a comma list of `<kind>/<folder>`:
+
+```bash
+BERMOODA_EXTENSION_INSTALL_SCRIPTS=plugins/resend bermooda plugin add @bermooda/plugin-resend
+```
+
+An extension can't opt itself in. The shop's own `npm run build` uses the same
+variable. `peerDependencies` and `bermooda.dependencies` merge into the shop's
+`package.json` and install at the shop root with scripts on, since native addons
+belong there.
+
 ### Engine compatibility (`bermooda.engine`)
 
 Plugins and themes must declare a semver range in `package.json` under the
