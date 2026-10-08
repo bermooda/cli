@@ -1,5 +1,6 @@
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -11,6 +12,8 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  EXTENSION_INSTALL_SCRIPTS_ENV,
+  extensionInstallScriptsAllowed,
   installExtension,
   installExtensionLocalDependencies,
   mergeExtensionDependencies,
@@ -200,7 +203,7 @@ describe('resolveExtensionSource + installExtension', () => {
     npmSpy.mockRestore();
   });
 
-  it('installExtensionLocalDependencies runs npm install in the extension dir', async () => {
+  it('installExtensionLocalDependencies runs npm install without lifecycle scripts', async () => {
     const pkgDir = mkdtempSync(join(tmpdir(), 'ext-local-deps-'));
     cleanups.push(pkgDir);
     writeFileSync(
@@ -213,11 +216,40 @@ describe('resolveExtensionSource + installExtension', () => {
 
     const npmMod = await import('../src/lib/process.js');
     const npmSpy = vi.spyOn(npmMod, 'npm').mockResolvedValue(0);
+    vi.stubEnv(EXTENSION_INSTALL_SCRIPTS_ENV, '');
+
+    await installExtensionLocalDependencies(pkgDir);
+
+    expect(npmSpy).toHaveBeenCalledWith(pkgDir, [
+      'install',
+      '--ignore-scripts',
+    ]);
+    npmSpy.mockRestore();
+    vi.unstubAllEnvs();
+  });
+
+  it('installExtensionLocalDependencies runs lifecycle scripts when the operator allows the extension', async () => {
+    const shop = mkdtempSync(join(tmpdir(), 'ext-scripts-'));
+    cleanups.push(shop);
+    const pkgDir = join(shop, 'app', 'plugins', 'resend');
+    mkdirSync(pkgDir, { recursive: true });
+    writeFileSync(
+      join(pkgDir, 'package.json'),
+      JSON.stringify({
+        name: '@bermooda/plugin-resend',
+        dependencies: { resend: '4.0.0' },
+      })
+    );
+
+    const npmMod = await import('../src/lib/process.js');
+    const npmSpy = vi.spyOn(npmMod, 'npm').mockResolvedValue(0);
+    vi.stubEnv(EXTENSION_INSTALL_SCRIPTS_ENV, 'themes/default,plugins/resend');
 
     await installExtensionLocalDependencies(pkgDir);
 
     expect(npmSpy).toHaveBeenCalledWith(pkgDir, ['install']);
     npmSpy.mockRestore();
+    vi.unstubAllEnvs();
   });
 
   it('installExtensionLocalDependencies no-ops when there are no local deps', async () => {
@@ -270,7 +302,7 @@ describe('resolveExtensionSource + installExtension', () => {
     const dest = join(shop, 'app', 'plugins', 'with-deps');
     // Shop peer merge + local extension install
     expect(npmSpy).toHaveBeenCalledWith(shop, ['install']);
-    expect(npmSpy).toHaveBeenCalledWith(dest, ['install']);
+    expect(npmSpy).toHaveBeenCalledWith(dest, ['install', '--ignore-scripts']);
 
     const shopPkg = JSON.parse(
       readFileSync(join(shop, 'package.json'), 'utf8')
@@ -307,7 +339,7 @@ describe('resolveExtensionSource + installExtension', () => {
     });
 
     const dest = join(shop, 'app', 'plugins', 'local-only');
-    expect(npmSpy).toHaveBeenCalledWith(dest, ['install']);
+    expect(npmSpy).toHaveBeenCalledWith(dest, ['install', '--ignore-scripts']);
     expect(npmSpy).not.toHaveBeenCalledWith(shop, ['install']);
 
     const shopPkg = JSON.parse(
@@ -380,5 +412,31 @@ describe('official package id slug heuristics', () => {
 
     rmSync(themeDir, { recursive: true, force: true });
     rmSync(pluginDir, { recursive: true, force: true });
+  });
+});
+
+describe('extensionInstallScriptsAllowed', () => {
+  const dir = join('/shop', 'app', 'plugins', 'resend');
+
+  it('denies scripts when the setting is unset, empty, or off', () => {
+    for (const setting of [undefined, '', '0', 'false', 'no']) {
+      expect(extensionInstallScriptsAllowed(dir, setting)).toBe(false);
+    }
+  });
+
+  it('allows every extension for 1, true, or all', () => {
+    for (const setting of ['1', 'true', 'ALL', ' all ']) {
+      expect(extensionInstallScriptsAllowed(dir, setting)).toBe(true);
+    }
+  });
+
+  it('allows only listed <kind>/<folder> entries', () => {
+    expect(
+      extensionInstallScriptsAllowed(dir, 'themes/default, plugins/resend')
+    ).toBe(true);
+    expect(extensionInstallScriptsAllowed(dir, 'plugins/sendgrid')).toBe(false);
+    // A bare folder name or the wrong kind does not match.
+    expect(extensionInstallScriptsAllowed(dir, 'resend')).toBe(false);
+    expect(extensionInstallScriptsAllowed(dir, 'themes/resend')).toBe(false);
   });
 });
