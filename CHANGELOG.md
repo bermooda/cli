@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/bermooda/cli/compare/v1.4.0...v1.4.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* skip extension dependency install scripts by default ([5ec45a2](https://github.com/bermooda/cli/commit/5ec45a2343fb483a73ba6e0bc9e3c5ed6d54c76c))
+
 ## [1.4.0](https://github.com/bermooda/cli/compare/v1.3.0...v1.4.0) (2026-08-11)
 
 
