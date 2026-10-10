@@ -8,7 +8,7 @@ import {
 } from '../../lib/extension-source.js';
 import { setShopExtensions } from '../../lib/extensions-settings.js';
 import { listInstalled } from '../../lib/fs-install.js';
-import { error, success } from '../../lib/logger.js';
+import { error, info, success } from '../../lib/logger.js';
 import { assertInShop } from '../../lib/project.js';
 
 /**
