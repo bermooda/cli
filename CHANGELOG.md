@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/bermooda/cli/compare/v1.4.1...v1.4.2) (2026-10-10)
+
+
+### Bug Fixes
+
+* **plugin:** import info logger used by plugin remove ([11b092d](https://github.com/bermooda/cli/commit/11b092d771b0c915222a31a70c7b4a93e9d99571))
+
 ## [1.4.1](https://github.com/bermooda/cli/compare/v1.4.0...v1.4.1) (2026-10-09)
 
 
